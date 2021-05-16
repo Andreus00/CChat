@@ -3,6 +3,12 @@
 #include <gtk/gtk.h>
 #include <time.h>
 #include <stdbool.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <string.h>
+#include <netdb.h>
+#include <arpa/inet.h>
 
 struct message {
   int sender;       //id of the sender
@@ -12,11 +18,72 @@ struct message {
   char msg[300];    //message.
 };
 
+int portno, sockfd;
+
+struct sockaddr_in serv_addr;
+
+char *host_name;
+
+GtkWidget *window; // pointer that will point to the main window
+GtkWidget *textView;
+GtkTextBuffer *textBuffer;
+GtkWidget *vBox;
+GtkWidget *scroll_text_view;
+GtkWidget *bottom_hbox;
+GtkWidget *send_button;
+GtkWidget *chat_view;
+
+void send_message(GtkWidget *b, gpointer data) {
+
+    unsigned int text_length = (unsigned int) gtk_text_buffer_get_char_count(textBuffer);
+
+    GtkTextIter *start_iter = malloc(sizeof(GtkTextIter));
+    GtkTextIter *end_iter = malloc(sizeof(GtkTextIter));
+    gtk_text_buffer_get_iter_at_offset (textBuffer, start_iter, (gint) 0);
+    gtk_text_buffer_get_iter_at_offset (textBuffer, end_iter, (gint) text_length);
+                            
+
+    char *text = gtk_text_buffer_get_text(textBuffer, start_iter, end_iter, FALSE);
+
+    write(sockfd, text, strlen(text));
+}
+
+void error(char *msg)
+{
+    perror(msg);
+    exit(0);
+}
+
+
 
 static void startup (GtkApplication* app, gpointer user_data) {
     //initialise logs, set up a connection with the server, 
     puts("Logs initialization complete\n");
 
+    // connecting to the server
+    puts("Connecting to the server\n");
+
+
+    portno = 50000;
+
+    sockfd = socket(AF_INET, SOCK_STREAM, 0);
+
+    if(sockfd < 0)
+      error("Error while openeng socket.\n");
+    
+    memset(&serv_addr, 0, sizeof(serv_addr));
+    
+    serv_addr.sin_family = AF_INET;
+    serv_addr.sin_port = htons(5000); 
+    if(inet_pton(AF_INET, host_name, &serv_addr.sin_addr)<=0) {
+        printf("\n inet_pton error occured\n");
+        exit(1);
+    }
+
+    if( connect(sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
+       printf("\n Error : Connect Failed \n");
+       exit(1);
+    }
     puts("Connected to the server\n");
 }
 
@@ -24,14 +91,6 @@ static void activate (GtkApplication* app, gpointer user_data) {
 
   puts("init gui");
 
-  GtkWidget *window; // pointer that will point to the main window
-  GtkWidget *textView;
-  GtkTextBuffer *textBuffer;
-  GtkWidget *vBox;
-  GtkWidget *scroll_text_view;
-  GtkWidget *bottom_hbox;
-  GtkWidget *send_button;
-  GtkWidget *chat_view;
 
   window = gtk_application_window_new (app);                    // creation of the new window
   gtk_window_set_title (GTK_WINDOW (window), "Window");         // setting the window
@@ -65,6 +124,8 @@ static void activate (GtkApplication* app, gpointer user_data) {
   gtk_widget_set_size_request (send_button, 60, 20);
   gtk_widget_set_hexpand ((GtkWidget *) send_button, FALSE);
   gtk_widget_set_halign ((GtkWidget *) send_button, GTK_ALIGN_FILL);
+
+  g_signal_connect(G_OBJECT(send_button), "clicked", G_CALLBACK(send), NULL);
 
   // chat view settings
 
@@ -101,6 +162,11 @@ static void activate (GtkApplication* app, gpointer user_data) {
 
 
 int main (int argc, char **argv) {
+  if (argc != 2) {
+    perror("Prease specify a host address");
+    exit(1);
+  }
+  host_name = argv[1];
   GtkApplication *app;  // pointer to the app instance
   int p = 0;
   int status;           // return status of the application
