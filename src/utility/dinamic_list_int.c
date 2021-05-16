@@ -168,7 +168,7 @@ element dinamic_list_pop(dinamic_list *list, long i) {
 
 int dinamic_list_insert(dinamic_list *list,int element, long index) {
     if (index < 0 || index > list->last) {
-        perror("Insert index out of range")
+        perror("Insert index out of range");
         return 1;
     }
     if (dinamic_list_add(list, element)) {
