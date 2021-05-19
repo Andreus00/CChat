@@ -9,40 +9,34 @@
 #include <string.h>
 #include <netdb.h>
 #include <arpa/inet.h>
-#include "../utility/login_view.h"
-#include "../utility/chat_view.h"
-
-int portno, sockfd;
 
 
-char *host_name;
+#include "../structs/structs.h"
+#include "../ui/login_view.h"
+#include "../ui/chat_view.h"
 
-chatroom_widgets widgets;
-login_widgets lgn_widgets;
+chatroom_widgets *widgets;
+login_widgets *lgn_widgets;
+GtkWidget *window;
 
-int send_message() {
 
-    GtkTextIter start_iter, end_iter;
-
-    gtk_text_buffer_get_bounds (widgets.textBuffer, &start_iter, &end_iter);
-
-    char *text = gtk_text_buffer_get_text(widgets.textBuffer, &start_iter, &end_iter, FALSE);
-
-    write(sockfd, text, strlen(text));
-
-    memset(&start_iter, 0, sizeof(start_iter));
-    
-    gtk_text_buffer_get_iter_at_offset (widgets.textBuffer, &start_iter, 0);
-
-    gtk_text_buffer_delete (widgets.textBuffer, &start_iter, &end_iter);
-
-    return 0;
+void login_callback(int fd) {
+    init_chatroom(window, widgets, fd);
+    show_chatroom(widgets);
 }
 
-static void activate (GtkApplication* app, gpointer user_data) {
-  printf("%p", init_connection);
-  show_login(app, &lgn_widgets);
-  printf("done\n");
+
+void startup(GtkApplication* app, gpointer user_data){
+    widgets = malloc(sizeof(chatroom_widgets));
+    lgn_widgets = malloc(sizeof(lgn_widgets));
+    window = malloc(sizeof(GtkWindow));
+}
+
+void activate (GtkApplication* app, gpointer user_data) {
+    window = gtk_application_window_new (GTK_APPLICATION (app));
+    init_login(window, lgn_widgets);
+    show_login(lgn_widgets);
+    gtk_widget_show (window);
 }
 
 
@@ -51,13 +45,13 @@ int main (int argc, char **argv) {
     perror("Prease launch the application without arguments");
     exit(1);
   }
-  // host_name = "0.0.0.0";
-  // init_connection();
   GtkApplication *app;  // pointer to the app instance
   int p = 0;
   int status;           // return status of the application
 
   app = gtk_application_new ("it.sanchietti.cchat", G_APPLICATION_FLAGS_NONE);    // creation of the app
+
+  g_signal_connect (app, "startup", G_CALLBACK (startup), &p);
 
   g_signal_connect (app, "activate", G_CALLBACK (activate), &p);      // connect the app to the activate function.
 
