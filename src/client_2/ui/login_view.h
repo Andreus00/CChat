@@ -112,7 +112,7 @@ returns the informations of the connection.
 */
 
 void init_login(GtkWidget *window, login_widgets *widgets) {
-
+    puts("init login");
     w = widgets;
 
     widgets->main_frame = gtk_frame_new("Login");              // creation of the new window
@@ -131,7 +131,6 @@ void init_login(GtkWidget *window, login_widgets *widgets) {
     // port field
     widgets->port_field = gtk_entry_new();
     gtk_entry_set_alignment (GTK_ENTRY(widgets->port_field), 0.5f);
-    
     char *send_button_text = "connect";
 
     widgets->connect_button = gtk_button_new_with_label(send_button_text);
@@ -150,7 +149,7 @@ void init_login(GtkWidget *window, login_widgets *widgets) {
     gtk_container_add (GTK_CONTAINER (widgets->main_frame), widgets->vBox);
 
     gtk_container_add (GTK_CONTAINER (window), widgets->main_frame);
-
+    puts("end login");
 }
 
 void show_login(login_widgets * widgets) {

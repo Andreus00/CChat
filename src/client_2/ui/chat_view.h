@@ -21,25 +21,26 @@ chatroom_widgets *wid;
 int send_message() {
     puts("Sending message");
     GtkTextIter start_iter, end_iter;
-    printf("\n\ntextBuffer pointer = %p\n\n", wid->textBuffer);
 
     gtk_text_buffer_get_bounds (wid->textBuffer, &start_iter, &end_iter);
 
     char *text = gtk_text_buffer_get_text(wid->textBuffer, &start_iter, &end_iter, FALSE);
-    write(sockfd, text, strlen(text));
+    if (strlen(text) != 0){
+        write(sockfd, text, strlen(text));
 
-    memset(&start_iter, 0, sizeof(start_iter));
-    free(text);
-    
-    gtk_text_buffer_get_iter_at_offset (wid->textBuffer, &start_iter, 0);
+        memset(&start_iter, 0, sizeof(start_iter));
+        free(text);
+        
+        gtk_text_buffer_get_iter_at_offset (wid->textBuffer, &start_iter, 0);
 
-    gtk_text_buffer_delete (wid->textBuffer, &start_iter, &end_iter);
+        gtk_text_buffer_delete (wid->textBuffer, &start_iter, &end_iter);
 
-    char buff[14];
+        char buff[14];
 
-    read(sockfd, buff, 14);
+        read(sockfd, buff, 14);
 
-    printf("%s", buff);
+        printf("%s\n", buff);
+    }
 
     return 0;
 }

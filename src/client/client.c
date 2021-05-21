@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <unistd.h>
-#include <gtk/gtk.h>
 #include <time.h>
+#include <stdlib.h>
 #include <stdbool.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -9,61 +9,156 @@
 #include <string.h>
 #include <netdb.h>
 #include <arpa/inet.h>
-#include "../utility/login_view.h"
-#include "../utility/chat_view.h"
-
-int portno, sockfd;
 
 
-char *host_name;
+#include "structs.h"
 
-chatroom_widgets widgets;
-login_widgets lgn_widgets;
+int init_connection();
 
-int send_message() {
 
-    GtkTextIter start_iter, end_iter;
+void error(char *msg)
+{
+    perror(msg);
+    exit(0);
+}
 
-    gtk_text_buffer_get_bounds (widgets.textBuffer, &start_iter, &end_iter);
+int main (int argc, char **argv) {
+    if (argc != 1) {
+    perror("Prease launch the application without arguments");
+    exit(1);
+    }
+    puts("Starting");
 
-    char *text = gtk_text_buffer_get_text(widgets.textBuffer, &start_iter, &end_iter, FALSE);
-
-    write(sockfd, text, strlen(text));
-
-    memset(&start_iter, 0, sizeof(start_iter));
+    puts(" _    _      _                            _          _____  _____ _           _   ");
+    puts("| |  | |    | |                          | |        /  __ \\/  __ \\ |         | |  ");
+    puts("| |  | | ___| | ___ ___  _ __ ___   ___  | |_ ___   | /  \\/| /  \\/ |__   __ _| |_ ");
+    puts("| |/\\| |/ _ \\ |/ __/ _ \\| '_ ` _ \\ / _ \\ | __/ _ \\  | |    | |   | '_ \\ / _` | __|");
+    puts("\\  /\\  /  __/ | (_| (_) | | | | | |  __/ | || (_) | | \\__/\\| \\__/\\ | | | (_| | |_ ");
+    puts(" \\/  \\/ \\___|_|\\___\\___/|_| |_| |_|\\___|  \\__\\___/   \\____/ \\____/_| |_|\\__,_|\\__|");
+    puts("\n");
     
-    gtk_text_buffer_get_iter_at_offset (widgets.textBuffer, &start_iter, 0);
-
-    gtk_text_buffer_delete (widgets.textBuffer, &start_iter, &end_iter);
+    init_connection();
 
     return 0;
 }
 
-static void activate (GtkApplication* app, gpointer user_data) {
-  printf("%p", init_connection);
-  show_login(app, &lgn_widgets);
-  printf("done\n");
-}
+
+int init_connection() {
+
+    login_data *data;                                   // struct that will contain the info for the login
+
+    struct sockaddr_in *serv_addr;                      // struct that will contain the info of the server
+
+    int portno;                                         // variable that will contain the port number
+
+    int sockfd = socket(AF_INET, SOCK_STREAM, 0);       // file descriptor of the socket
+
+    if(sockfd < 0) {
+        error("Error while openeng socket.\n");
+        return -1;
+    }
+
+    data = malloc(sizeof(login_data));
+
+    data->host = calloc(40, sizeof(char));
+    
+    serv_addr = malloc(sizeof(struct sockaddr_in));
+    serv_addr->sin_family = AF_INET;
+
+    int connection_succeded;
+    
+    int condition = 1;
+
+    do {
 
 
-int main (int argc, char **argv) {
-  if (argc != 1) {
-    perror("Prease launch the application without arguments");
-    exit(1);
-  }
-  // host_name = "0.0.0.0";
-  // init_connection();
-  GtkApplication *app;  // pointer to the app instance
-  int p = 0;
-  int status;           // return status of the application
+        while (condition) {
+            puts("Please enter the server address: ");
 
-  app = gtk_application_new ("it.sanchietti.cchat", G_APPLICATION_FLAGS_NONE);    // creation of the app
+            int n = scanf("%s",data->host);
+            fflush(stdin);
 
-  g_signal_connect (app, "activate", G_CALLBACK (activate), &p);      // connect the app to the activate function.
+            while ( n <= 0) {
+                puts("Please enter a valid server address.");
+                n = scanf("%s",data->host);
+                fflush(stdin);
+            }
 
-  status = g_application_run (G_APPLICATION (app), argc, argv);         // run the app. 
+            fflush(stdin);
+            if(inet_pton(AF_INET, data->host, &(serv_addr->sin_addr)) > 0) {
+                
+                puts("Please enter the port: ");
 
-  g_object_unref (app);
+                n = scanf("%d",&data->port);
+                fflush(stdin);
 
-  return status;
+                while ( n <= 0) {
+                    puts("Please enter a valid port.");
+                    n = scanf("%d",&data->port);
+                    fflush(stdin);
+                }
+                if(0 > data->port || data->port > 65536)
+                    puts("Invalid port.");
+                else
+                    condition = 0;
+            }
+        }
+
+        // connecting to the server
+        puts("Connecting to the server\n");
+
+        
+
+        if( (connection_succeded = connect(sockfd, (struct sockaddr *)serv_addr, sizeof(*serv_addr))) < 0) {
+            printf("\n Error : Connect Failed \n");
+            printf("Retry with %s:%d? Y/n", data->host, data->port);
+            char c[1];
+            fflush(stdin);
+            scanf("%1s", c);
+            if ( (int) c[0] != (int) 'Y' && (int) c[0] != (int) 'y')
+                condition = 1;
+            fflush(stdin);
+        }
+        else {
+            puts("Connected to the server\n");
+        }        
+
+    } while (connection_succeded < 0);
+
+
+    puts("Enter your nickname: ");
+
+    int n = scanf("%20s",data->nickname);
+
+    char response[2];
+    fflush(stdin);
+
+    while ( n <= 0) {
+        puts("Please enter a valid nickname.");
+        n = scanf("%20s",data->nickname);
+        fflush(stdin);
+    }
+
+    write(sockfd, data->nickname, strlen(data->nickname));
+
+    read(sockfd, response, 1);
+
+    while (response[0] == 0) {
+        puts("invalid nickname, please chose a new one: ");
+        n = scanf("%20s",data->nickname);
+
+        fflush(stdin);
+
+        while ( n <= 0) {
+            puts("Please enter a valid nickname.");
+            n = scanf("%20s",data->nickname);
+            fflush(stdin);
+        }
+
+        write(sockfd, data->nickname, strlen(data->nickname));
+
+        read(sockfd, response, 1);
+    }
+
+    return sockfd;
 }

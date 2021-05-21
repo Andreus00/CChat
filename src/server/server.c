@@ -89,16 +89,16 @@ int main(int argc, char *argv[]) {
             continue;
         }
 
-        cli_data data =  {clifd, cli_addr};
+        cli_data *data = malloc(sizeof(cli_data));
+        data->clifd = clifd;
+        data->cli_addr = cli_addr;
         dinamic_list_add(cli_data_list, &data);
-        if (pthread_create(&tid, 0, &chat_start, &data) != 0){
+        if (pthread_create(&tid, 0, &chat_start, data) != 0){
             perror("Error while creating the thread");
             close(clifd);
         }
 
     }
-    
-    close(sockfd);
 }
 
 void *chat_start(void *info) {
@@ -108,13 +108,23 @@ void *chat_start(void *info) {
     struct sockaddr *cli_addr = (struct sockaddr *) data->cli_addr;
     int n;
     char buffer[BUFFER_SIZE];
+    char nickname[20];
+    read(clifd, nickname, 20);
+
+    write(clifd, "1", 1);
+
     while (1) {
         n = read(clifd, buffer, BUFFER_SIZE - 1);
-        
+
+        printf("%s", buffer);
+
+        if (n == 0) {
+            close(clifd);
+            return data;
+        }
         n = write(clifd, "Message got", 12);
         memset(buffer, 0, BUFFER_SIZE);
     }
-    return data;
 }
 
 
