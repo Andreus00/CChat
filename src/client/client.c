@@ -9,11 +9,16 @@
 #include <string.h>
 #include <netdb.h>
 #include <arpa/inet.h>
+#include <sys/ioctl.h>
+#include <pthread.h>
 
-
+#include "../utility/dinamic_list.h"
 #include "structs.h"
 
-int init_connection();
+#define MESSAGE_BUFFER_SIZE 256
+
+login_data *init_connection();
+int start_chat(login_data *);
 
 
 void error(char *msg)
@@ -24,42 +29,145 @@ void error(char *msg)
 
 int main (int argc, char **argv) {
     if (argc != 1) {
-    perror("Prease launch the application without arguments");
+    perror("Please launch the application without arguments");
     exit(1);
     }
     puts("Starting");
+  
+    /*
+    struct winsize w;
+    ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
 
-    puts(" _    _      _                            _          _____  _____ _           _   ");
-    puts("| |  | |    | |                          | |        /  __ \\/  __ \\ |         | |  ");
-    puts("| |  | | ___| | ___ ___  _ __ ___   ___  | |_ ___   | /  \\/| /  \\/ |__   __ _| |_ ");
-    puts("| |/\\| |/ _ \\ |/ __/ _ \\| '_ ` _ \\ / _ \\ | __/ _ \\  | |    | |   | '_ \\ / _` | __|");
-    puts("\\  /\\  /  __/ | (_| (_) | | | | | |  __/ | || (_) | | \\__/\\| \\__/\\ | | | (_| | |_ ");
-    puts(" \\/  \\/ \\___|_|\\___\\___/|_| |_| |_|\\___|  \\__\\___/   \\____/ \\____/_| |_|\\__,_|\\__|");
-    puts("\n");
+    printf ("lines %d\n", w.ws_row);
+    printf ("columns %d\n", w.ws_col);
+    */
     
-    init_connection();
+    fflush(stdout);
+    puts("___________________________________________________________________________________________");
+    puts("|    _    _      _                            _          _____  _____ _           _        |");
+    puts("|   | |  | |    | |                          | |        /  __ \\/  __ \\ |         | |       |");
+    puts("|   | |  | | ___| | ___ ___  _ __ ___   ___  | |_ ___   | /  \\/| /  \\/ |__   __ _| |_      |");
+    puts("|   | |/\\| |/ _ \\ |/ __/ _ \\| '_ ` _ \\ / _ \\ | __/ _ \\  | |    | |   | '_ \\ / _` | __|     |");
+    puts("|   \\  /\\  /  __/ | (_| (_) | | | | | |  __/ | || (_) | | \\__/\\| \\__/\\ | | | (_| | |_      |");
+    puts("|    \\/  \\/ \\___|_|\\___\\___/|_| |_| |_|\\___|  \\__\\___/   \\____/ \\____/_| |_|\\__,_|\\__|     |");
+    puts("|__________________________________________________________________________________________|\n");
+    fflush(stdout);
+
+    login_data *log_data = init_connection();
+    if (log_data == NULL){
+        error("An error ocurred.");
+    }
+
+    start_chat(log_data);
+
+
 
     return 0;
 }
 
+char *get_current_time() {
 
-int init_connection() {
+    time_t rawtime;
+    struct tm * timeinfo;
+
+    time ( &rawtime );
+    timeinfo = localtime ( &rawtime );
+    return asctime (timeinfo);
+}
+
+int print_message(char* message) {
+    printf("\r%s", message);
+    return 0;
+}
+
+int send_message(dinamic_list *msg, login_data *log_data) {
+    puts("sending");
+    unsigned int msg_length = 256 * msg->last;
+    char *msg_buffer = calloc(msg_length, sizeof(char));
+    for (long i = 0; i < msg->last; i++) {
+        strcat(msg_buffer, msg->list[i]);
+    }
+    write(log_data->fd, msg_buffer, msg_length);
+
+    return 0;
+}
+
+/**
+ * this functions reads and returns an ar
+*/
+char* readinput() {
+#define CHUNK 200
+   char* input = NULL;
+   char tempbuf[CHUNK];
+   size_t inputlen = 0, templen = 0;
+   do {
+       fgets(tempbuf, CHUNK, stdin);
+       templen = strlen(tempbuf);
+       input = realloc(input, inputlen+templen+1);
+       strcpy(input+inputlen, tempbuf);
+       inputlen += templen;
+    } while (templen==CHUNK-1 && tempbuf[CHUNK-2]!='\n');
+    return input;
+}
+
+
+
+void *reader(void *log_data) {
+    #define SIZE_OF_BUF 200
+        char buf[SIZE_OF_BUF];
+
+    while (1) {
+        if(read(((login_data *)log_data)->fd, buf, SIZE_OF_BUF-1) > 0) {
+            printf("\r");
+            printf("\033[1A");
+            printf("\033[K");
+            printf("%s\n\n", buf);
+            printf("\033[1B");
+            memset(buf, 0, SIZE_OF_BUF);
+        }
+    }
+}
+
+
+
+int start_chat(login_data *log_data) {
+    // build the message format
+    pthread_t tid;
+
+    pthread_create(&tid, NULL, &reader, (void *)log_data);
+
+    while (1) {
+        // read from cmd the text
+
+        char *buff = readinput();
+
+        if(strlen(buff) > 0) {
+            write(log_data->fd, buff, strlen(buff));
+        }
+
+        free(buff);
+        //log here
+    }
+}
+
+
+login_data *init_connection() {
 
     login_data *data;                                   // struct that will contain the info for the login
 
     struct sockaddr_in *serv_addr;                      // struct that will contain the info of the server
 
-    int portno;                                         // variable that will contain the port number
+    // int portno;                                         // variable that will contain the port number
 
     int sockfd = socket(AF_INET, SOCK_STREAM, 0);       // file descriptor of the socket
 
     if(sockfd < 0) {
         error("Error while openeng socket.\n");
-        return -1;
+        return NULL;
     }
 
     data = malloc(sizeof(login_data));
-
+    data->fd = sockfd;
     data->host = calloc(40, sizeof(char));
     
     serv_addr = malloc(sizeof(struct sockaddr_in));
@@ -68,7 +176,6 @@ int init_connection() {
     int connection_succeded;
     
     int condition = 1;
-
     do {
 
 
@@ -79,7 +186,7 @@ int init_connection() {
             fflush(stdin);
 
             while ( n <= 0) {
-                puts("Please enter a valid server address.");
+                perror("Please enter a valid server address.");
                 n = scanf("%s",data->host);
                 fflush(stdin);
             }
@@ -93,19 +200,25 @@ int init_connection() {
                 fflush(stdin);
 
                 while ( n <= 0) {
-                    puts("Please enter a valid port.");
+                    perror("Please enter a valid port. ");
                     n = scanf("%d",&data->port);
                     fflush(stdin);
                 }
                 if(0 > data->port || data->port > 65536)
-                    puts("Invalid port.");
-                else
+                    perror("Invalid port.");
+                else {
+                    serv_addr->sin_port = htons(data->port);
                     condition = 0;
+                }
+            }
+            else{
+                fprintf(stderr,"ERROR, no such host\n");
             }
         }
 
         // connecting to the server
-        puts("Connecting to the server\n");
+        printf("Connecting to the server %d:%d\n", serv_addr->sin_addr.s_addr, serv_addr->sin_port);
+
 
         
 
@@ -126,39 +239,53 @@ int init_connection() {
     } while (connection_succeded < 0);
 
 
-    puts("Enter your nickname: ");
+    fflush(stdin);
+    fflush(stdout);
 
+    data->nickname = calloc(20, sizeof(char));
+    puts("Enter your nickname: ");
+    char response[2];
+    response[1] = '\0';
     int n = scanf("%20s",data->nickname);
 
-    char response[2];
-    fflush(stdin);
 
     while ( n <= 0) {
+        printf("%d", n);
         puts("Please enter a valid nickname.");
-        n = scanf("%20s",data->nickname);
+        sleep(1);
         fflush(stdin);
+        n = fscanf(stdin, "%20s",data->nickname);
     }
 
     write(sockfd, data->nickname, strlen(data->nickname));
 
     read(sockfd, response, 1);
 
-    while (response[0] == 0) {
+    printf("%s", response);
+
+    while (response[0] == '0') {
         puts("invalid nickname, please chose a new one: ");
         n = scanf("%20s",data->nickname);
-
         fflush(stdin);
 
         while ( n <= 0) {
             puts("Please enter a valid nickname.");
-            n = scanf("%20s",data->nickname);
-            fflush(stdin);
+            n = scanf(".%20s.",data->nickname);
+            printf("%s", data->nickname);
         }
 
         write(sockfd, data->nickname, strlen(data->nickname));
 
-        read(sockfd, response, 1);
-    }
+        
+        if(read(sockfd, response, 1) <= 0) {
+            perror("Server disconnected");
+            close(sockfd);
+            return NULL;
+        }
+        printf("response = %s", response);
 
-    return sockfd;
+    }
+    puts(">>> Joined");
+
+    return data;
 }

@@ -6,6 +6,7 @@
 #include <string.h>
 #include <time.h>
 #include <stdlib.h>
+#include <pthread.h>
 
 
 #define MIN_SIZE 10
@@ -21,6 +22,8 @@ typedef struct {
     long last;      // posizione dell'ultimo elemento della lista
 
     void **list;     // questo è il puntatore alla lista dinamica
+
+    pthread_mutex_t *mutex; // this mutex can be used to modify the list
 
 } dinamic_list;
 
@@ -42,26 +45,33 @@ int dinamic_list_expand(dinamic_list *);
 int dinamic_list_reduce(dinamic_list *);
 
 int dinamic_list_add(dinamic_list *list, void *el) {
+
+    pthread_mutex_lock(list->mutex);
+
     long *last = &((* list).last);
 
     if (((* last) + 1) == (* list).allocated_size) {
         if(dinamic_list_expand(list)) {
             perror("Unable to add the element.\n");
+            pthread_mutex_unlock(list->mutex);
             return 1;
         };
     }
     (* list).last++;
     (* list).list[(* last)] = el;
+    pthread_mutex_unlock(list->mutex);
 
     return 0;
 }
 
 element dinamic_list_pop_last(dinamic_list *list) {
+    pthread_mutex_lock(list->mutex);
     long *last = &((* list).last);
 
     if ((* last) == -1) {
         perror("List is empty");
         element e = {0, 1};
+        pthread_mutex_unlock(list->mutex);
         return e;
     }
 
@@ -74,6 +84,7 @@ element dinamic_list_pop_last(dinamic_list *list) {
     (* list).list[(* last)] = 0;
     (* list).last--;
     element e = {popped, 0};
+    pthread_mutex_unlock(list->mutex);
     return e;
 }
 
@@ -92,8 +103,13 @@ int dinamic_list_expand(dinamic_list *list) {
     }
     
     * p_length = res;
+
+    dinamic_list **old = (dinamic_list **) list->list;
     
     (* list).list = realloc((* list).list, sizeof(p_length)*res);
+
+    for (int i = *p_length; i == 0; i-- )
+        free(old[i]);
 
     return 0;
 }
@@ -105,8 +121,13 @@ int dinamic_list_reduce(dinamic_list *list) {
     long res = MAX((* p_length) - reduce, MIN_SIZE);
     
     *p_length = res;
+
+    dinamic_list **old = (dinamic_list **) list->list;
     
     (* list).list = realloc((* list).list, sizeof(p_length)*res);
+
+    for (int i = *p_length; i == 0; i-- )
+        free(old[i]);
 
     return 0;
 }
@@ -128,7 +149,8 @@ dinamic_list *dinamic_list_new() {
     (* list).last = -1;
     (* list).allocated_size = MIN_SIZE;
     (* list).list = calloc(MIN_SIZE, sizeof(list));
-
+    list->mutex = malloc(sizeof(pthread_mutex_t));
+    pthread_mutex_init(list->mutex, NULL);
     return list;
 }
 
@@ -142,8 +164,28 @@ void dinamic_list_print(dinamic_list *list) {
     }
 }
 
+void *dinamic_list_remove_element(dinamic_list *list, void *el) {
+    pthread_mutex_lock(list->mutex);
+    void *ret = NULL;
+    for(int i = 0; i > list->last; i++) {
+        if (list->list[i] == el) {
+            for (long j = i; j < list->last; j++) {
+                list->list[j] = list->list[j+1];
+            }
+            ret = list->list[list->last];
+            list->list[list->last] = 0;
+            list->last--;
+            pthread_mutex_unlock(list->mutex);
+            return ret;
+        }
+    }
+    pthread_mutex_unlock(list->mutex);
+    return ret;
+}
+
 
 element dinamic_list_pop(dinamic_list *list, long i) {
+    pthread_mutex_lock(list->mutex);
     int last = (* list).last;
 
     element *ret = malloc(sizeof(element));
@@ -164,7 +206,7 @@ element dinamic_list_pop(dinamic_list *list, long i) {
 
         list->last--;
     }
-
+    pthread_mutex_unlock(list->mutex);
     return *ret;
 }
 
@@ -178,10 +220,14 @@ int dinamic_list_insert(dinamic_list *list,void *element, long index) {
         return 1;
     }
 
+    pthread_mutex_lock(list->mutex);
+
     for(int i = list->last; i > index; i--) {
         list->list[i] = list->list[i - 1];
     }
     list->list[index] = element;
+
+    pthread_mutex_unlock(list->mutex);
 
     return 0;
 }
