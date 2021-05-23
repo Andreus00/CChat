@@ -45,3 +45,6 @@ typedef struct {
     dinamic_list *cli_data_list;
     chat_message_list *msg_list;
 } reader_thread_param;
+
+
+enum chat_mode {TIMESTAMP_MODE, RECEIVE_MODE};

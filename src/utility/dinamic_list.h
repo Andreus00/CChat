@@ -167,7 +167,7 @@ void dinamic_list_print(dinamic_list *list) {
 void *dinamic_list_remove_element(dinamic_list *list, void *el) {
     pthread_mutex_lock(list->mutex);
     void *ret = NULL;
-    for(int i = 0; i > list->last; i++) {
+    for(int i = 0; i <= list->last; i++) {
         if (list->list[i] == el) {
             for (long j = i; j < list->last; j++) {
                 list->list[j] = list->list[j+1];

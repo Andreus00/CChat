@@ -43,14 +43,14 @@ int main (int argc, char **argv) {
     */
     
     fflush(stdout);
-    puts("___________________________________________________________________________________________");
+    puts("\033[32m___________________________________________________________________________________________");
     puts("|    _    _      _                            _          _____  _____ _           _        |");
     puts("|   | |  | |    | |                          | |        /  __ \\/  __ \\ |         | |       |");
     puts("|   | |  | | ___| | ___ ___  _ __ ___   ___  | |_ ___   | /  \\/| /  \\/ |__   __ _| |_      |");
     puts("|   | |/\\| |/ _ \\ |/ __/ _ \\| '_ ` _ \\ / _ \\ | __/ _ \\  | |    | |   | '_ \\ / _` | __|     |");
     puts("|   \\  /\\  /  __/ | (_| (_) | | | | | |  __/ | || (_) | | \\__/\\| \\__/\\ | | | (_| | |_      |");
     puts("|    \\/  \\/ \\___|_|\\___\\___/|_| |_| |_|\\___|  \\__\\___/   \\____/ \\____/_| |_|\\__,_|\\__|     |");
-    puts("|__________________________________________________________________________________________|\n");
+    puts("|__________________________________________________________________________________________|\n\033[0m ");
     fflush(stdout);
 
     login_data *log_data = init_connection();
@@ -123,10 +123,10 @@ void *reader(void *log_data) {
         if(n > 0) {
             //printf("\033[s");   // save the cursor point
             printf("\r");
-            printf("\033[1A");
-            //printf("\033[K");
+            printf("\033[2A");
+            printf("\033[K");
             printf("%s\n", buf);
-            //printf("\033[u");   // restore the cursor point
+            printf("\033[2B");   
             memset(buf, 0, SIZE_OF_BUF);
         }
         else if (n == 0) {
@@ -191,19 +191,29 @@ login_data *init_connection() {
 
     int connection_succeded;
     
-    int condition = 1;
+    int correct_host = 1;
     do {
 
 
-        while (condition) {
+        while (correct_host) {
             puts("Please enter the server address: ");
 
             int n = scanf("%s",data->host);
+            printf("\r");
+            printf("\033[1A");
+            printf("\033[K");
+            printf("\033[1A");
+            printf("\033[K");
             fflush(stdin);
 
             while ( n <= 0) {
                 perror("Please enter a valid server address.");
                 n = scanf("%s",data->host);
+                printf("\r");
+                printf("\033[1A");
+                printf("\033[K");
+                printf("\033[1A");
+                printf("\033[K");
                 fflush(stdin);
             }
 
@@ -213,27 +223,37 @@ login_data *init_connection() {
                 puts("Please enter the port: ");
 
                 n = scanf("%d",&data->port);
+                printf("\r");
+                printf("\033[1A");
+                printf("\033[K");
+                printf("\033[1A");
+                printf("\033[K");
                 fflush(stdin);
 
                 while ( n <= 0) {
                     perror("Please enter a valid port. ");
                     n = scanf("%d",&data->port);
+                    printf("\r");
+                    printf("\033[1A");
+                    printf("\033[K");
+                    printf("\033[1A");
+                    printf("\033[K");
                     fflush(stdin);
                 }
                 if(0 > data->port || data->port > 65536)
                     perror("Invalid port.");
                 else {
                     serv_addr->sin_port = htons(data->port);
-                    condition = 0;
+                    correct_host = 0;
                 }
             }
             else{
-                fprintf(stderr,"ERROR, no such host\n");
+                fprintf(stdout,"ERROR, no such host\n");
             }
         }
 
         // connecting to the server
-        printf("Connecting to the server %d:%d\n", serv_addr->sin_addr.s_addr, serv_addr->sin_port);
+        printf("Connecting to the server %d:%d\n", serv_addr->sin_addr.s_addr, data->port);
 
 
         
@@ -242,11 +262,15 @@ login_data *init_connection() {
             printf("\n Error : Connect Failed \n");
             printf("Retry with %s:%d? Y/n", data->host, data->port);
             char c[1];
-            fflush(stdin);
             scanf("%1s", c);
-            if ( (int) c[0] != (int) 'Y' && (int) c[0] != (int) 'y')
-                condition = 1;
+            printf("\r");
+            printf("\033[1A");
+            printf("\033[K");
+            printf("\033[1A");
+            printf("\033[K");
             fflush(stdin);
+            if ( (int) c[0] != (int) 'Y' && (int) c[0] != (int) 'y')
+                correct_host = 1;
         }
         else {
             puts("Connected to the server\n");
@@ -263,14 +287,25 @@ login_data *init_connection() {
     char response[2];
     response[1] = '\0';
     int n = scanf("%20s",data->nickname);
+    printf("\r");
+    printf("\033[1A");
+    printf("\033[K");
+    printf("\033[1A");
+    printf("\033[K");
+    fflush(stdin);
 
 
     while ( n <= 0) {
         printf("%d", n);
         puts("Please enter a valid nickname.");
         sleep(1);
-        fflush(stdin);
         n = fscanf(stdin, "%20s",data->nickname);
+        printf("\r");
+        printf("\033[1A");
+        printf("\033[K");
+        printf("\033[1A");
+        printf("\033[K");
+        fflush(stdin);
     }
 
     write(sockfd, data->nickname, strlen(data->nickname));
@@ -280,11 +315,22 @@ login_data *init_connection() {
     while (response[0] == '0') {
         puts("invalid nickname, please chose a new one: ");
         n = scanf("%20s",data->nickname);
+        printf("\r");
+        printf("\033[1A");
+        printf("\033[K");
+        printf("\033[1A");
+        printf("\033[K");
         fflush(stdin);
 
         while ( n <= 0) {
             puts("Please enter a valid nickname.");
             n = scanf(".%20s.",data->nickname);
+            printf("\r");
+            printf("\033[1A");
+            printf("\033[K");
+            printf("\033[1A");
+            printf("\033[K");
+            fflush(stdin);
             printf("%s", data->nickname);
         }
 
@@ -298,7 +344,9 @@ login_data *init_connection() {
         }
 
     }
-    puts(">>> Joined");
+    printf("\r");
+    printf("\033[1A");
+    printf("\033[K");
 
     return data;
 }
