@@ -17,6 +17,9 @@
 
 #define BUFFER_SIZE 255
 
+enum chat_mode {TIMESTAMP_MODE, RECEIVE_MODE};
+
+enum chat_mode mode;
 
 void *chat_start(void *);
 void *reader_start(void *);
@@ -43,7 +46,29 @@ chat_mutex *chat_mutex_new() {
 
 int main(int argc, char *argv[]) {
 
-    unsigned int port_in;
+    int port_in;
+
+    if (argc == 1) {
+        port_in = 50000;
+        mode = RECEIVE_MODE;
+    }
+    else if (argc == 3) {
+        port_in = atoi(argv[1]);
+        printf("Port in: %d", port_in);
+        if(strcmp(argv[2], "TIMESTAMP_MODE") == 0) {
+            puts("Log mode : TIMESTAMP_MODE");
+            mode = TIMESTAMP_MODE;
+        }
+        else if (strcmp(argv[2], "RECEIVE_MODE") == 0){
+            puts("Log mode : RECEIVE_MODE");
+            mode = RECEIVE_MODE;
+        }
+        else {
+            puts("Log mode not detected: setting RECEIVE_MODE");
+            mode = RECEIVE_MODE;
+        }
+        
+    }
 
     unsigned int queue_length = 15;
 
@@ -56,23 +81,12 @@ int main(int argc, char *argv[]) {
     // init chat message list
     chat_message_list *msg_list = calloc(1, sizeof(chat_message_list));
 
-    puts("A");
     msg_list->message_list = dinamic_list_new();
-    puts("A");
 
     msg_list->mutex = chat_mutex_new();
-    puts("A");
     // init cli_data_list
     cli_data_list = dinamic_list_new();
 
-    //////
-    if (argc == 1) {
-        port_in = 50000;
-    }
-    else if (argc == 2) {
-        port_in = atoi(argv[1]);
-    }
-    puts("init dinamic list");
     // creating the socket of the server
     puts("init socket");
     sockfd = socket(AF_INET, SOCK_STREAM, 0);   //SOCK_SEQPACKET?
@@ -143,13 +157,42 @@ char *get_current_time() {
     time ( &rawtime );
     timeinfo = localtime ( &rawtime );
     char *ascii_time = asctime (timeinfo);
-    int l = strlen(ascii_time) - 1;
-    char *ret_ascii_time = malloc(l * sizeof(char));
-    strncpy(ret_ascii_time, ascii_time, l);
-    return ret_ascii_time;
+    ascii_time[strlen(ascii_time) - 1] = '\0';
+    return ascii_time;
+}
+
+void chat_log(chat_message *msg, FILE *f) {
+    printf("logging\n");
+    unsigned int msg_len = strlen(msg->sender) + strlen(msg->time) + strlen(msg->message) + 7;
+    char assembled_message[msg_len];
+    snprintf(assembled_message, msg_len, "[%s, %s] %s\n", msg->sender, msg->time, msg->message);
+    if(mode == RECEIVE_MODE) {
+        fwrite(assembled_message, sizeof(char), msg_len, f);;
+    }
+    else
+        printf("TODO\n");
+}
+
+void send_message_to_everyone(chat_message  *msg, dinamic_list *cli_data_list) {
+    pthread_mutex_lock(cli_data_list->mutex);
+    for (int i = 0; i <= cli_data_list->last; i++) {
+        //if (strcmp(((cli_data *)(cli_data_list->list[i]))->nickname, msg->sender) != 0)
+        dprintf(((cli_data *)(cli_data_list->list[i]))->clifd, "[%s, %s] %s\n", msg->sender, msg->time, msg->message);
+    }
+    pthread_mutex_unlock(cli_data_list->mutex);
 }
 
 void *reader_start(void *info) {
+
+    char log_file_name[16];
+
+    strcpy(log_file_name, "log_file");
+    if (mode == TIMESTAMP_MODE)
+        strcat(log_file_name, "TMS.txt");
+    else
+        strcat(log_file_name, "RCV.txt");
+
+    FILE *fp = fopen(log_file_name, "ab+");
 
     reader_thread_param *reader_param = (reader_thread_param *) info;
 
@@ -168,7 +211,8 @@ void *reader_start(void *info) {
         for (int i = msg_list->message_list->last; i >= 0; i--) {
             element e = dinamic_list_pop(msg_list->message_list, 0);
             chat_message *msg= e.value;
-            fprintf(stdout, "[%s, %s] %s\n", msg->sender, msg->time, msg->message);
+            chat_log(msg, fp);
+            send_message_to_everyone(msg, cli_data_list);
             msg_list->mutex->msg_n--;
         }
         printf("\033[0;31m READER THREAD:    UNLOCKING THE MUTEX\n");
@@ -183,6 +227,8 @@ void *reader_start(void *info) {
 1 if in the list, 0 if not
 */
 int check_name(dinamic_list *l, char *n) {
+    if (strlen(n) < 1)
+        return 1;
     puts("\033[33m Checking name : lock on mutex\033[0m");
     pthread_mutex_lock(l->mutex);
 
@@ -192,10 +238,10 @@ int check_name(dinamic_list *l, char *n) {
     int ret = 0;
     for (long i = 0; i <= l->last; i++) {
 
-        printf("\033[33m Checking name : getting data\033[0m");
+        puts("\033[33m Checking name : getting data\033[0m");
         cli_data *data = (cli_data *) l->list[i];
 
-        printf("\033[33m Checking name : %s\033[0m", data->nickname);
+        printf("\033[33m Checking name : %s\033[0m\n", data->nickname);
         if (strcmp(data->nickname, n) == 0) {
             ret = 1;
             break;
@@ -231,11 +277,9 @@ void *chat_start(void *info) {
             close(clifd);
             return NULL;
         }
-        printf("%s\n", nickname);
+        printf("name : %s\n", nickname);
 
     } while ((do_loop = check_name(cli_data_list, nickname)));
-
-    printf("Name accepted: %s", nickname);
 
     write(clifd, "1", 1);
 
@@ -244,13 +288,26 @@ void *chat_start(void *info) {
     dinamic_list_add(cli_data_list, data);
     int n;
 
+
+    chat_message *new_message = malloc(sizeof(chat_message));
+    new_message->sender = nickname;
+    new_message->message = "\033[32m-- Joined the chat\033[0m\n";
+    new_message->time = get_current_time();
+    send_message_to_everyone(new_message, cli_data_list);
+
     while (1) {
         n = read(clifd, buffer, BUFFER_SIZE);
 
         if (n <=0) {
             close(clifd);
-            dinamic_list_remove_element(cli_data_list, (void *) data);
-            printf("%s left the chat.\n", nickname);
+            if (dinamic_list_remove_element(cli_data_list, (void *) data) == NULL) {    // bug here
+                puts("NOT FOUNDDDDDDDD");
+            }
+            chat_message *new_message = malloc(sizeof(chat_message));
+            new_message->sender = nickname;
+            new_message->message = "\033[31m-- Left the chat\033[0m\n";
+            new_message->time = get_current_time();
+            send_message_to_everyone(new_message, cli_data_list);
             return data;
         }
         else if(n > 1) {
@@ -259,7 +316,6 @@ void *chat_start(void *info) {
             new_message->sender = nickname;
             new_message->message = buffer;
             new_message->time = get_current_time();
-            printf("Buffer = %s\n", buffer);
 
             dinamic_list_add(msg_list->message_list,(void *) new_message);
             msg_list->mutex->msg_n++;
@@ -268,7 +324,6 @@ void *chat_start(void *info) {
 
             pthread_mutex_unlock(msg_list->mutex->mutex);
 
-            //n = write(clifd, buffer, strlen(buffer));
             buffer = calloc(BUFFER_SIZE, sizeof(char));
         }
 

@@ -113,17 +113,30 @@ char* readinput() {
 
 
 void *reader(void *log_data) {
-    #define SIZE_OF_BUF 200
-        char buf[SIZE_OF_BUF];
+#define SIZE_OF_BUF 200
+    char buf[SIZE_OF_BUF];
+
+    // FILE *fp = fopen("local_log.txt", "ab+");
 
     while (1) {
-        if(read(((login_data *)log_data)->fd, buf, SIZE_OF_BUF-1) > 0) {
+        int n = read(((login_data *)log_data)->fd, buf, SIZE_OF_BUF-1);
+        if(n > 0) {
+            //printf("\033[s");   // save the cursor point
             printf("\r");
             printf("\033[1A");
-            printf("\033[K");
-            printf("%s\n\n", buf);
-            printf("\033[1B");
+            //printf("\033[K");
+            printf("%s\n", buf);
+            //printf("\033[u");   // restore the cursor point
             memset(buf, 0, SIZE_OF_BUF);
+        }
+        else if (n == 0) {
+            perror("\033[31mServer closed the connection\033[0m");
+            close(((login_data *)log_data)->fd);
+            exit(1);
+        }
+        else {
+            perror("Error while reading from the socket");
+            exit(1);
         }
     }
 }
@@ -142,6 +155,9 @@ int start_chat(login_data *log_data) {
         char *buff = readinput();
 
         if(strlen(buff) > 0) {
+            printf("\r");
+            printf("\033[1A");
+            printf("\033[K");
             write(log_data->fd, buff, strlen(buff));
         }
 
@@ -261,8 +277,6 @@ login_data *init_connection() {
 
     read(sockfd, response, 1);
 
-    printf("%s", response);
-
     while (response[0] == '0') {
         puts("invalid nickname, please chose a new one: ");
         n = scanf("%20s",data->nickname);
@@ -282,7 +296,6 @@ login_data *init_connection() {
             close(sockfd);
             return NULL;
         }
-        printf("response = %s", response);
 
     }
     puts(">>> Joined");
