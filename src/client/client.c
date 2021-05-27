@@ -61,7 +61,7 @@ int main (int argc, char **argv) {
     if (log_data == NULL){
         error("An error ocurred.");
     }
-
+    
     start_chat(log_data);
 
 
@@ -137,7 +137,7 @@ int start_chat(login_data *log_data) {
             }
             else {
                 new_message->time = get_current_time_u();
-                unsigned int msg_len = strlen(new_message->sender) + strlen(new_message->time) + strlen(new_message->message) + 7;
+                unsigned int msg_len = strlen(new_message->sender) + strlen(new_message->time) + strlen(new_message->message) + 8;
                 char assembled_message[msg_len];
                 snprintf(assembled_message, msg_len, "[%s, %s] %s\n", new_message->sender, new_message->time, new_message->message);
                 write(log_data->fd, assembled_message, msg_len);
@@ -195,7 +195,7 @@ login_data *init_connection() {
                 
                 puts("Please enter the port: ");
 
-                char *p, s[PORT_LEN];
+                char s[PORT_LEN];
                 memset(s, 0, PORT_LEN);
 
                 while (fgets(s, PORT_LEN - 1, stdin)) {
@@ -228,9 +228,6 @@ login_data *init_connection() {
         // connecting to the server
         printf("Connecting to the server %d:%d\n", serv_addr->sin_addr.s_addr, data->port);
 
-
-        
-
         if( (connection_succeded = connect(sockfd, (struct sockaddr *)serv_addr, sizeof(*serv_addr))) < 0) {
             printf("\n Error : Connect Failed \n");
             printf("Retry with %s:%d? Y/n", data->host, data->port);
@@ -255,10 +252,8 @@ login_data *init_connection() {
     fflush(stdin);
     fflush(stdout);
 
-    data->nickname = calloc(NICK_LEN, sizeof(char));
     puts("Enter your nickname: ");
-    fgets(data->nickname, NICK_LEN - 1, stdin);
-    data->nickname[strcspn(data->nickname, "\n")] = '\0';
+    data->nickname = readinput();
     printf("\r");
     printf("\033[1A");
     printf("\033[K");
@@ -275,9 +270,7 @@ login_data *init_connection() {
 
     while (response[0] == '0') {
         puts("Nickname already in use, please chose a new one: ");
-        fgets(data->nickname, NICK_LEN - 1, stdin);
-        data->nickname[NICK_LEN - 1] = '\0';
-        data->nickname[strcspn(data->nickname, "\n")] = '\0';
+        data->nickname = readinput();
 
         printf("\r");
         printf("\033[1A");
@@ -298,12 +291,13 @@ login_data *init_connection() {
         }
 
     }
+
+    data->nickname[strcspn(data->nickname, "\n")] = '\0';
+
     printf("\r");
     printf("\033[1A");
     printf("\033[K");
 
-    int c;
-    while ((c = getchar()) != '\n' && c != EOF );
     fflush(stdout);
 
     return data;

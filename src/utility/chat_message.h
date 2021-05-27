@@ -42,7 +42,7 @@ char *readinput_without_newline() {
 char *read_fd(int fd) {
     int read_len = 0, buffer_len = 0;
     char *buffer = NULL;
-    char temp_buff[BUFFER_SIZE];
+    char *temp_buff = malloc(sizeof(char) * BUFFER_SIZE);
     do {   // if there is something else to read
         memset(temp_buff, 0, BUFFER_SIZE);
         read_len = read(fd, temp_buff, BUFFER_SIZE - 1);
@@ -53,6 +53,7 @@ char *read_fd(int fd) {
         memset(buffer + buffer_len, 0, read_len);
         strcpy(buffer + buffer_len, temp_buff);
         buffer_len += read_len;
-    }while ((temp_buff[read_len-1]!='\n' && temp_buff[read_len-2]!='\n'));
+    }while ((temp_buff[read_len-1]!='\0' && temp_buff[read_len-1]!='\n') && (read_len >= (BUFFER_SIZE - 1)));
+    
     return buffer;
 }

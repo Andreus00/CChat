@@ -184,25 +184,21 @@ void queue_message(chat_message_list *msg_list,char *nickname, char *text) {
         new_message->time = get_current_time();
     }
     else {
-        // devo capire dove inizia il timestamp: scorro il text fino alla fine del nome.
         int text_len = strlen(text);
-        int i = 0;  //i will be the index of the first character after the user's name.
-        while (i < (text_len - 1) && text[i + 1] == nickname[i]) {
-            i++;
-        }
-        i += 2;    // the offset of the timestamp is 2 chars after the end of the nickname (we have 'nickname, timestamp' ).
-        int j = i;      // j will be the index of the ']'.
-        while (text[j] != ']') j++;
-        printf("Malloc for message = %d\n", (text_len) - j + 1);
-        if (j <= 0) {
-            printf("Received a message without timestamp.\n");
+        int i = strlen(nickname) + 3;
+        int j = i;
+        while (j < text_len && text[j] != ']') j++;
+        j += 2;
+        printf("Malloc for message = %d\n", (text_len) - j + 3);
+        if (j >= text_len - 1) {
+            printf("ERROR: .\n");
             return;
         }
         new_message->message = malloc(sizeof(char) * (text_len) - j + 3);
-        memcpy(new_message->message, &text[j + 2], (text_len) - j + 3);
+        memcpy(new_message->message, &text[j], (text_len) - j);
         printf("Malloc for time = %d\n", j - i + 1);
         new_message->time = malloc(sizeof(char) * j - i + 1);
-        memcpy(new_message->time, &text[i], j);
+        memcpy(new_message->time, &text[i], j - i);
         new_message->message[(text_len) - j] = '\0';
         new_message->time[j - i] = '\0';
         free(text);
@@ -320,17 +316,18 @@ int check_name(dinamic_list *l, char *n) {
 void _server_send_message(chat_message_list *msg_list, char *nickname, char *text) {
     if(mode == TIMESTAMP_MODE) {
         char *time = get_current_time();
-        unsigned int msg_len = strlen(time) + strlen(text) + strlen(nickname) + 9;
+        unsigned int msg_len = strlen(time) + strlen(text) + strlen(nickname) + 6;
         char *assembled_message = calloc(msg_len, sizeof(char));
-        snprintf(assembled_message, msg_len - 1, "[%s, %s] %s", nickname, time, text);
+        snprintf(assembled_message, msg_len, "[%s, %s] %s", nickname, time, text);
         queue_message(msg_list, nickname, assembled_message);
     }
-    else {
+    else if (mode == RECEIVE_MODE) {
         char *allocated_text = calloc(strlen(text), sizeof(char));
         strcpy(allocated_text, text);
         queue_message(msg_list, nickname, allocated_text);
 
     }
+    else printf("MODEEEEEEEEEEEEEEEEEEEEEEEEe");
 }
 
 
@@ -342,21 +339,27 @@ void *chat_start(void *info) {
     dinamic_list *cli_data_list = param->cli_data_list;
     chat_message_list *msg_list = param->msg_list;
     int clifd = data->clifd;
-    char nickname[NICK_SIZE];
+    char *nickname;
     int do_loop = 0;
     do {
         if (do_loop) {
             write(clifd, "0", 1);
         }
-        memset(nickname, 0, NICK_SIZE);
 
         printf("\033[33m %d wants to join.\n\033[0m", clifd);
-        int aa = read(clifd, nickname, (NICK_SIZE - 1));
-        if (aa <= 0) {
+        nickname = read_fd(clifd);
+        puts("SSS");
+        if (nickname == NULL) {
             printf("\033[33m Client %d disconnected\n\033[0m", clifd);
             close(clifd);
             return NULL;
         }
+        // int aa = read(clifd, nickname, NICK_SIZE - 1);
+        // if (aa <= 0) {
+        //     printf("\033[33m Client %d disconnected\n\033[0m", clifd);
+        //     close(clifd);
+        //     return NULL;
+        // }
         printf("\033[33m name : %s\n\033[0m", nickname);
 
     } while ((do_loop = check_name(cli_data_list, nickname)));
@@ -364,6 +367,8 @@ void *chat_start(void *info) {
     write(clifd, "1", 1);
 
     data->nickname = nickname;
+    data->nickname[strcspn(data->nickname, "\n\0")] = '\0';
+
 
     dinamic_list_add(cli_data_list, data);
 
