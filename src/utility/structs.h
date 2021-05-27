@@ -1,43 +1,57 @@
 /*
-    once the user enters the login data, this struct will contain all the pointers pointing to the information.
+Struttura utilizzata per mantenere i dati per il log degli utenti
 */
 typedef struct {
-    char *nickname;
-    char *host;
-    int port;
-    int fd;
+    char *nickname;     // puntatore al nickname dell'utente
+    char *host;         // puntatore all'ip del server
+    int port;           // porta a cui deve colegarsi il client
+    int fd;             // file descriptor del server
 }login_data;
 
-/**
- * this struct has all the  
+/*
+struttura usata dal server per mnantenere le informazioni riguardanti i client connessi  
  */
 typedef struct {
-    int clifd;
-    char *nickname;
-    struct sockaddr_in *cli_addr;
+    int clifd;                      // file descriptor dell'utente
+    char *nickname;                 // puntatore al nickname dell'utente
+    struct sockaddr_in *cli_addr;   // putnatore alla struttura contenetre le informazioni del socket dell'utente
 } cli_data;
 
+/*
+struttura usata per un accesso ai messaggi che sfrutta lock e conditions in modo da non avere problemi di concorrenza
+*/
 typedef struct {
-    pthread_mutex_t *mutex;         // every thread must lock this when he wants to write a message to the other clients
-    pthread_cond_t *cond;           // cond used bu the reader
-    long msg_n;
+    pthread_mutex_t *mutex;         // puntatore almutex usato quando si vuole aggiungere un messaggio alla lista dei messaggi
+    pthread_cond_t *cond;           // puntatore alla condition usata dal reader thread del server per capire quando ci sono messaggi in coda (producer - consumer)
+    long msg_n;                     // numero di messaggi in coda. viene usata questa variabile per la condition
 }chat_mutex;
 
+/*
+struttura che contiene le informazioni riguardanti un messaggio
+*/
 typedef struct {
-    char *sender;
-    char *message;
-    char *time;
+    char *sender;   // puntatore al nickname di chi ha mandato il messaggio
+    char *message;  // puntatore al contenuto del messaggio
+    char *time;     // puntatore al time del messaggio
 }chat_message;
 
+/*
+struttura che unisce una dinamic_list (di chat_messge) e un chat_mutex.
+Il chat mutex gestisce l'accesso e la lettura dalla lista da parte dei thread del server
+*/
 typedef struct {
-    dinamic_list *message_list;
-    chat_mutex *mutex;
+    dinamic_list *message_list;     // puntatore alla dinamic_list contenente dei messaggi
+    chat_mutex *mutex;              // puntatore al mutex da lockare quando si vuole lavorare con la message_list
 } chat_message_list;
 
+/*
+struttura che racchiude le informazioni che servono ai thread che ricevono i client.
+Le informazioni vengono usate per la "registrazione" dell'utente e per gestire l'arrivo dei messaggi.
+*/
 typedef struct {
-    cli_data *data;
-    dinamic_list *cli_data_list;
-    chat_message_list *msg_list;
+    cli_data *data;                 // puntatore a una struttura contenente le informazioni sul client
+    dinamic_list *cli_data_list;    // puntatore a una dinamic list contenente tutti gli utenti connessi
+    chat_message_list *msg_list;    // putnatore alla lista dei messaggi
 } receiver_thread_param;
 
 typedef struct {
@@ -47,13 +61,3 @@ typedef struct {
 
 
 enum chat_mode {TIMESTAMP_MODE, RECEIVE_MODE};
-
-struct time_info {
-    char day[4];
-    char month[4];
-    int day_n;
-    int hour;
-    int minute;
-    int second;
-    int year;
-};
