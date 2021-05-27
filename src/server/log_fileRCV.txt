@@ -193,3 +193,45 @@
 
 [Asdfijasd, Thu May 27 20:04:43 2021] [31m-- Left the chat
 [0m
+[And, Fri May 28 01:14:43 2021] [32m-- Join the chat
+[0m
+[And, Fri May 28 01:14:54 2021] [32m-- Join the chat
+[0m
+[And, Fri May 28 01:14:59 2021] s
+
+[And, Fri May 28 01:15:03 2021] [31m-- Left the chat
+[0m
+[And, Fri May 28 01:15:05 2021] [31m-- Left the chat
+[0m
+[And, Fri May 28 01:17:20 2021] [32m-- Join the chat
+[0m
+[Asd, Fri May 28 01:17:31 2021] [32m-- Join the chat
+[0m
+[Asd, Fri May 28 01:17:32 2021] d
+
+[Asd, Fri May 28 01:17:33 2021] g
+
+[Asd, Fri May 28 01:17:33 2021] f
+
+[Asd, Fri May 28 01:17:33 2021] g
+
+[Asd, Fri May 28 01:17:33 2021] sfg
+
+[Asd, Fri May 28 01:17:34 2021] fgfdgdf
+
+[And, Fri May 28 01:17:41 2021] gfdg
+
+[And, Fri May 28 01:17:43 2021] [31m-- Left the chat
+[0m
+[Asd, Fri May 28 01:17:44 2021] [31m-- Left the chat
+[0m
+[sadfasfhsfhjahsjkfhsaòjdf, Fri May 28 01:21:11 2021] [32m-- Join the chat
+[0m
+[sadfasfhsfhjahsjkfhsaòjdf, Fri May 28 01:21:12 2021] d
+
+[sadfasfhsfhjahsjkfhsaòjdf, Fri May 28 01:21:12 2021] dg
+
+[sadfasfhsfhjahsjkfhsaòjdf, Fri May 28 01:21:13 2021] a
+
+[sadfasfhsfhjahsjkfhsaòjdf, Fri May 28 01:21:13 2021] [31m-- Left the chat
+[0m

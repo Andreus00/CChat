@@ -354,12 +354,7 @@ void *chat_start(void *info) {
             close(clifd);
             return NULL;
         }
-        // int aa = read(clifd, nickname, NICK_SIZE - 1);
-        // if (aa <= 0) {
-        //     printf("\033[33m Client %d disconnected\n\033[0m", clifd);
-        //     close(clifd);
-        //     return NULL;
-        // }
+        nickname[strcspn(nickname, "\n\0")] = '\0';
         printf("\033[33m name : %s\n\033[0m", nickname);
 
     } while ((do_loop = check_name(cli_data_list, nickname)));
@@ -367,7 +362,6 @@ void *chat_start(void *info) {
     write(clifd, "1", 1);
 
     data->nickname = nickname;
-    data->nickname[strcspn(data->nickname, "\n\0")] = '\0';
 
 
     dinamic_list_add(cli_data_list, data);
