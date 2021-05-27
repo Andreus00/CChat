@@ -320,7 +320,7 @@ int check_name(dinamic_list *l, char *n) {
 void _server_send_message(chat_message_list *msg_list, char *nickname, char *text) {
     if(mode == TIMESTAMP_MODE) {
         char *time = get_current_time();
-        unsigned int msg_len = strlen(time) + strlen(text) + strlen(nickname) + 8;
+        unsigned int msg_len = strlen(time) + strlen(text) + strlen(nickname) + 9;
         char *assembled_message = calloc(msg_len, sizeof(char));
         snprintf(assembled_message, msg_len - 1, "[%s, %s] %s", nickname, time, text);
         queue_message(msg_list, nickname, assembled_message);
@@ -351,7 +351,7 @@ void *chat_start(void *info) {
         memset(nickname, 0, NICK_SIZE);
 
         printf("\033[33m %d wants to join.\n\033[0m", clifd);
-        int aa = read(clifd, nickname, (NICK_SIZE - 1) * sizeof(char));
+        int aa = read(clifd, nickname, (NICK_SIZE - 1));
         if (aa <= 0) {
             printf("\033[33m Client %d disconnected\n\033[0m", clifd);
             close(clifd);

@@ -49,7 +49,6 @@ char *read_fd(int fd) {
         if (read_len <= 0) {
             return NULL;
         }
-
         buffer = realloc(buffer, (buffer_len + read_len + 1));
         memset(buffer + buffer_len, 0, read_len);
         strcpy(buffer + buffer_len, temp_buff);

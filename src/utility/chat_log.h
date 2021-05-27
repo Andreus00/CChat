@@ -30,18 +30,18 @@ void chat_log(chat_message *msg, enum chat_mode m) {
     char log_file_name[16];
     strcpy(log_file_name, "log_file");
     FILE *f;
-    if(m == RECEIVE_MODE) {
-        unsigned int msg_len = strlen(msg->sender) + strlen(msg->time) + strlen(msg->message) + 7;
-        char assembled_message[msg_len];
-        snprintf(assembled_message, msg_len, "[%s, %s] %s\n", msg->sender, msg->time, msg->message);
+    if(m == RECEIVE_MODE) {    
         strcat(log_file_name, "RCV.txt");
-        f = fopen(log_file_name, "a");
-        fwrite(assembled_message, sizeof(char), msg_len, f);
     }
     else {
         strcat(log_file_name, "TMS.txt");
-        f = fopen(log_file_name, "a");
-        fwrite(msg->message, sizeof(char), strlen(msg->message), f);
     }
+    unsigned int msg_len = strlen(msg->sender) + strlen(msg->time) + strlen(msg->message) + 7;
+    char assembled_message[msg_len];
+    snprintf(assembled_message, msg_len, "[%s, %s] %s\n", msg->sender, msg->time, msg->message);
+    f = fopen(log_file_name, "a");
+    fwrite(assembled_message, sizeof(char), msg_len - 1, f);
+
+
     fclose(f);
 }
