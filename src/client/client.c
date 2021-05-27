@@ -13,9 +13,14 @@
 #include <pthread.h>
 
 #include "../utility/dinamic_list.h"
-#include "structs.h"
+#include "../utility/structs.h"
+#include "../utility/chat_log.h"
+#include "../utility/chat_message.h"
 
 #define MESSAGE_BUFFER_SIZE 256
+#define HOST_LEN 41
+#define PORT_LEN 11
+#define NICK_LEN 195
 
 login_data *init_connection();
 int start_chat(login_data *);
@@ -27,20 +32,19 @@ void error(char *msg)
     exit(0);
 }
 
+int get_term_width() {
+    struct winsize w;
+    ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+    return w.ws_col;
+}
+
 int main (int argc, char **argv) {
     if (argc != 1) {
     perror("Please launch the application without arguments");
     exit(1);
     }
-    puts("Starting");
-  
-    /*
-    struct winsize w;
-    ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
 
-    printf ("lines %d\n", w.ws_row);
-    printf ("columns %d\n", w.ws_col);
-    */
+    printf("\033[2J");
     
     fflush(stdout);
     puts("\033[32m___________________________________________________________________________________________");
@@ -65,77 +69,27 @@ int main (int argc, char **argv) {
     return 0;
 }
 
-char *get_current_time() {
-
-    time_t rawtime;
-    struct tm * timeinfo;
-
-    time ( &rawtime );
-    timeinfo = localtime ( &rawtime );
-    return asctime (timeinfo);
-}
-
 int print_message(char* message) {
-    printf("\r%s", message);
+    printf("%s", message);
     return 0;
 }
-
-int send_message(dinamic_list *msg, login_data *log_data) {
-    puts("sending");
-    unsigned int msg_length = 256 * msg->last;
-    char *msg_buffer = calloc(msg_length, sizeof(char));
-    for (long i = 0; i < msg->last; i++) {
-        strcat(msg_buffer, msg->list[i]);
-    }
-    write(log_data->fd, msg_buffer, msg_length);
-
-    return 0;
-}
-
-/**
- * this functions reads and returns an ar
-*/
-char* readinput() {
-#define CHUNK 200
-   char* input = NULL;
-   char tempbuf[CHUNK];
-   size_t inputlen = 0, templen = 0;
-   do {
-       fgets(tempbuf, CHUNK, stdin);
-       templen = strlen(tempbuf);
-       input = realloc(input, inputlen+templen+1);
-       strcpy(input+inputlen, tempbuf);
-       inputlen += templen;
-    } while (templen==CHUNK-1 && tempbuf[CHUNK-2]!='\n');
-    return input;
-}
-
 
 
 void *reader(void *log_data) {
-#define SIZE_OF_BUF 200
-    char buf[SIZE_OF_BUF];
+    char *buf;
 
     // FILE *fp = fopen("local_log.txt", "ab+");
 
     while (1) {
-        int n = read(((login_data *)log_data)->fd, buf, SIZE_OF_BUF-1);
-        if(n > 0) {
+        buf = read_fd(((login_data *)log_data)->fd);
+        if(buf != NULL) {
             //printf("\033[s");   // save the cursor point
-            printf("\r");
-            printf("\033[2A");
-            printf("\033[K");
-            printf("%s\n", buf);
-            printf("\033[2B");   
-            memset(buf, 0, SIZE_OF_BUF);
-        }
-        else if (n == 0) {
-            perror("\033[31mServer closed the connection\033[0m");
-            close(((login_data *)log_data)->fd);
-            exit(1);
+            print_message(buf);
+            free(buf);
         }
         else {
-            perror("Error while reading from the socket");
+            perror("\033[31mServer closed the connection\033[0m");
+            close(((login_data *)log_data)->fd);
             exit(1);
         }
     }
@@ -147,6 +101,16 @@ int start_chat(login_data *log_data) {
     // build the message format
     pthread_t tid;
 
+    char m[2];
+    enum chat_mode mode;
+
+    read(log_data->fd, m, 1);
+
+    if (m[0] == '0')
+        mode = TIMESTAMP_MODE;
+    else 
+        mode = RECEIVE_MODE;
+
     pthread_create(&tid, NULL, &reader, (void *)log_data);
 
     while (1) {
@@ -154,11 +118,34 @@ int start_chat(login_data *log_data) {
 
         char *buff = readinput();
 
-        if(strlen(buff) > 0) {
+        int w = get_term_width();
+        int lines_to_remove = strlen(buff)/w;
+
+        for (int j = 0; j <= lines_to_remove; j++) {
             printf("\r");
             printf("\033[1A");
-            printf("\033[K");
-            write(log_data->fd, buff, strlen(buff));
+            printf("\033[K"); 
+        }
+
+        if(strlen(buff) > 1) {
+            chat_message *new_message = malloc(sizeof(chat_message));
+            new_message->sender = log_data->nickname;
+            new_message->message = buff;
+            new_message->time = get_current_time();
+            if (mode == RECEIVE_MODE)
+                write(log_data->fd, buff, strlen(buff));
+            else {
+                unsigned int msg_len = strlen(new_message->sender) + strlen(new_message->time) + strlen(new_message->message) + 7;
+                char assembled_message[msg_len];
+                snprintf(assembled_message, msg_len, "[%s, %s] %s\n", new_message->sender, new_message->time, new_message->message);
+                write(log_data->fd, assembled_message, msg_len);
+            }
+            chat_log(new_message, TIMESTAMP_MODE);
+        }
+        else {  // the user wrote a \n only
+            // printf("\r");
+            // printf("\033[1A");
+            // printf("\033[K");
         }
 
         free(buff);
@@ -184,7 +171,7 @@ login_data *init_connection() {
 
     data = malloc(sizeof(login_data));
     data->fd = sockfd;
-    data->host = calloc(40, sizeof(char));
+    data->host = calloc(HOST_LEN, sizeof(char));
     
     serv_addr = malloc(sizeof(struct sockaddr_in));
     serv_addr->sin_family = AF_INET;
@@ -195,51 +182,40 @@ login_data *init_connection() {
     do {
 
 
-        while (correct_host) {
+        do {
             puts("Please enter the server address: ");
 
-            int n = scanf("%s",data->host);
+            fgets(data->host, HOST_LEN - 1, stdin);
+            data->host[strcspn(data->host, "\n")] = '\0';
             printf("\r");
             printf("\033[1A");
             printf("\033[K");
             printf("\033[1A");
             printf("\033[K");
-            fflush(stdin);
+            
 
-            while ( n <= 0) {
-                perror("Please enter a valid server address.");
-                n = scanf("%s",data->host);
-                printf("\r");
-                printf("\033[1A");
-                printf("\033[K");
-                printf("\033[1A");
-                printf("\033[K");
-                fflush(stdin);
-            }
-
-            fflush(stdin);
             if(inet_pton(AF_INET, data->host, &(serv_addr->sin_addr)) > 0) {
                 
                 puts("Please enter the port: ");
 
-                n = scanf("%d",&data->port);
+                char *p, s[PORT_LEN];
+                memset(s, 0, PORT_LEN);
+
+                while (fgets(s, PORT_LEN - 1, stdin)) {
+                    data->port = atoi(s);
+                    if (data->port == 0) {
+                        printf("Please enter an integer: ");
+                    } else break;
+                }
                 printf("\r");
+                printf("\033[1A");
+                printf("\033[K");
                 printf("\033[1A");
                 printf("\033[K");
                 printf("\033[1A");
                 printf("\033[K");
                 fflush(stdin);
 
-                while ( n <= 0) {
-                    perror("Please enter a valid port. ");
-                    n = scanf("%d",&data->port);
-                    printf("\r");
-                    printf("\033[1A");
-                    printf("\033[K");
-                    printf("\033[1A");
-                    printf("\033[K");
-                    fflush(stdin);
-                }
                 if(0 > data->port || data->port > 65536)
                     perror("Invalid port.");
                 else {
@@ -250,7 +226,7 @@ login_data *init_connection() {
             else{
                 fprintf(stdout,"ERROR, no such host\n");
             }
-        }
+        } while (correct_host);
 
         // connecting to the server
         printf("Connecting to the server %d:%d\n", serv_addr->sin_addr.s_addr, data->port);
@@ -282,57 +258,38 @@ login_data *init_connection() {
     fflush(stdin);
     fflush(stdout);
 
-    data->nickname = calloc(20, sizeof(char));
+    data->nickname = calloc(NICK_LEN, sizeof(char));
     puts("Enter your nickname: ");
-    char response[2];
-    response[1] = '\0';
-    int n = scanf("%20s",data->nickname);
+    fgets(data->nickname, NICK_LEN - 1, stdin);
+    data->nickname[strcspn(data->nickname, "\n")] = '\0';
     printf("\r");
     printf("\033[1A");
     printf("\033[K");
     printf("\033[1A");
     printf("\033[K");
     fflush(stdin);
-
-
-    while ( n <= 0) {
-        printf("%d", n);
-        puts("Please enter a valid nickname.");
-        sleep(1);
-        n = fscanf(stdin, "%20s",data->nickname);
-        printf("\r");
-        printf("\033[1A");
-        printf("\033[K");
-        printf("\033[1A");
-        printf("\033[K");
-        fflush(stdin);
-    }
+    fflush(stdout);
 
     write(sockfd, data->nickname, strlen(data->nickname));
+    char response[2];
+    response[1] = '\0';
 
     read(sockfd, response, 1);
 
     while (response[0] == '0') {
-        puts("invalid nickname, please chose a new one: ");
-        n = scanf("%20s",data->nickname);
+        puts("Nickname already in use, please chose a new one: ");
+        fgets(data->nickname, NICK_LEN - 1, stdin);
+        data->nickname[NICK_LEN - 1] = '\0';
+        data->nickname[strcspn(data->nickname, "\n")] = '\0';
+
         printf("\r");
         printf("\033[1A");
         printf("\033[K");
         printf("\033[1A");
         printf("\033[K");
+        
         fflush(stdin);
-
-        while ( n <= 0) {
-            puts("Please enter a valid nickname.");
-            n = scanf(".%20s.",data->nickname);
-            printf("\r");
-            printf("\033[1A");
-            printf("\033[K");
-            printf("\033[1A");
-            printf("\033[K");
-            fflush(stdin);
-            printf("%s", data->nickname);
-        }
+        fflush(stdout);
 
         write(sockfd, data->nickname, strlen(data->nickname));
 
@@ -347,6 +304,10 @@ login_data *init_connection() {
     printf("\r");
     printf("\033[1A");
     printf("\033[K");
+
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF );
+    fflush(stdout);
 
     return data;
 }

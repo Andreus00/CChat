@@ -8,7 +8,6 @@ typedef struct {
     int fd;
 }login_data;
 
-
 /**
  * this struct has all the  
  */
@@ -48,3 +47,13 @@ typedef struct {
 
 
 enum chat_mode {TIMESTAMP_MODE, RECEIVE_MODE};
+
+struct time_info {
+    char day[4];
+    char month[4];
+    int day_n;
+    int hour;
+    int minute;
+    int second;
+    int year;
+};
