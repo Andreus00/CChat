@@ -131,21 +131,18 @@ int start_chat(login_data *log_data) {
             chat_message *new_message = malloc(sizeof(chat_message));
             new_message->sender = log_data->nickname;
             new_message->message = buff;
-            new_message->time = get_current_time();
-            if (mode == RECEIVE_MODE)
+            if (mode == RECEIVE_MODE) {
+                new_message->time = get_current_time();
                 write(log_data->fd, buff, strlen(buff));
+            }
             else {
+                new_message->time = get_current_time_u();
                 unsigned int msg_len = strlen(new_message->sender) + strlen(new_message->time) + strlen(new_message->message) + 7;
                 char assembled_message[msg_len];
                 snprintf(assembled_message, msg_len, "[%s, %s] %s\n", new_message->sender, new_message->time, new_message->message);
                 write(log_data->fd, assembled_message, msg_len);
             }
-            chat_log(new_message, TIMESTAMP_MODE);
-        }
-        else {  // the user wrote a \n only
-            // printf("\r");
-            // printf("\033[1A");
-            // printf("\033[K");
+            chat_log(new_message, mode);
         }
 
         free(buff);

@@ -3,19 +3,27 @@
 #include <stdlib.h>
 #include <sys/time.h>
 
-char *get_current_time() {
-    time_t rawtime;
+char *get_ascii_time_from_long(long t) {
     struct tm * timeinfo;
-    time ( &rawtime );
-    timeinfo = localtime ( &rawtime );
+    timeinfo = localtime ( &t );
     char *ascii_time = asctime (timeinfo);
     ascii_time[strlen(ascii_time) - 1] = '\0';
-    struct timeval  start;
-    gettimeofday(&start, NULL);
-    printf("Time: %lu\n", start.tv_sec);
-
-    printf("Time 2: %lu\n", rawtime);
     return ascii_time;
+}
+
+char *get_current_time() {
+    time_t rawtime;
+    time(&rawtime);
+    return get_ascii_time_from_long(rawtime);
+}
+
+char *get_current_time_u() {
+    #define RET_LEN 20
+    struct timeval  t;
+    gettimeofday(&t, NULL);
+    char *t_str = calloc(RET_LEN, sizeof(char));
+    snprintf(t_str, RET_LEN, "%lu", t.tv_sec * 1000000 + t.tv_usec);
+    return t_str;
 }
 
 void chat_log(chat_message *msg, enum chat_mode m) {

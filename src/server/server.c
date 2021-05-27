@@ -19,12 +19,19 @@
 
 enum chat_mode mode;
 
+int millis_check = 1;
+
 void *chat_start(void *);
 void *reader_start(void *);
 
 void error(char *msg)
 {
     perror(msg);
+    exit(1);
+}
+
+void print_usage() {
+    printf("Usage: ./server [port] [[mode] [millis_check]].\n You can put only the port, or the port and the mode.\nIf the mode is TIMESTAMP_MODE, you can choose the millis_check.\n");
     exit(1);
 }
 
@@ -49,7 +56,7 @@ int main(int argc, char *argv[]) {
     if (argc == 1) {
         port_in = 5000;
         mode = RECEIVE_MODE;
-        printf("port in = 50000\n");
+        printf("port in = 5000\n");
     }
     else if(argc == 2) {
         port_in = atoi(argv[1]);
@@ -57,7 +64,7 @@ int main(int argc, char *argv[]) {
         mode = RECEIVE_MODE;
         puts("Log mode not detected: setting RECEIVE_MODE");
     }
-    else if (argc == 3) {
+    else if (argc == 3 || argc == 4) {
         port_in = atoi(argv[1]);
         printf("Port in: %d\n", port_in);
         if(strcmp(argv[2], "TIMESTAMP_MODE") == 0) {
@@ -72,13 +79,15 @@ int main(int argc, char *argv[]) {
             puts("Log mode not detected: setting RECEIVE_MODE");
             mode = RECEIVE_MODE;
         }
+
+        if (argc == 4) millis_check = atoi(argv[3]);
+
         
-    }
-    
+    }    
     else {
-        printf("Usage: ./server [port] [mode]");
-        exit(1);
+        print_usage();
     }
+    if (port_in == 0 || millis_check == 0) print_usage();
 
     unsigned int queue_length = 15;
 
@@ -160,41 +169,8 @@ int main(int argc, char *argv[]) {
     }
 }
 
-struct time_info get_time_info_from_string(char *t) {
-    struct time_info t_info;
-    sscanf(t, "%s %s %d %d:%d:%d %d", t_info.day, t_info.month, &t_info.day_n, &t_info.hour, &t_info.minute, &t_info.second, &t_info.year);
-    return t_info;
-}
-
-int month_to_int(char *c) {
-    if (strcmp(c, "Gen")) return 1;
-    else if (strcmp(c, "Feb")) return 2;
-    else if (strcmp(c, "Mar")) return 3;
-    else if (strcmp(c, "Apr")) return 4;
-    else if (strcmp(c, "May")) return 5;
-    else if (strcmp(c, "Jun")) return 6;
-    else if (strcmp(c, "Jul")) return 7;
-    else if (strcmp(c, "Ago")) return 8;
-    else if (strcmp(c, "Sep")) return 9;
-    else if (strcmp(c, "Oct")) return 10;
-    else if (strcmp(c, "Nov")) return 11;
-    else if (strcmp(c, "Dec")) return 12;
-    else return 0;
-}
-
 int compare_time(chat_message *t1, chat_message *t2) {
-    struct time_info t_info1 = get_time_info_from_string(t1->time);
-    struct time_info t_info2 = get_time_info_from_string(t2->time);
-    int y = t_info1.year - t_info2.year;
-    if (y != 0) return y;
-    int m1 = month_to_int(t_info1.month);
-    int m2 = month_to_int(t_info2.month);
-    y = m1 - m2;
-    if (y != 0) return y;
-    y = t_info1.day_n - t_info2.day_n;
-    if (y != 0) return y;
-    return t_info1.hour != t_info2.hour ? t_info1.hour - t_info2.hour : t_info1.minute != t_info2.minute ? t_info1.minute - t_info2.minute : t_info1.second - t_info2.second;
-
+    return atoi(t1->time) - atoi(t2->time);
 }
 
 void queue_message(chat_message_list *msg_list,char *nickname, char *text) {
@@ -203,18 +179,15 @@ void queue_message(chat_message_list *msg_list,char *nickname, char *text) {
     chat_message *new_message = malloc(sizeof(chat_message));    
     new_message->sender = nickname;
 
-    puts("A");
     if (mode == RECEIVE_MODE) {
         new_message->message = text;
         new_message->time = get_current_time();
     }
     else {
-
         // devo capire dove inizia il timestamp: scorro il text fino alla fine del nome.
         int text_len = strlen(text);
         int i = 0;  //i will be the index of the first character after the user's name.
         while (i < (text_len - 1) && text[i + 1] == nickname[i]) {
-            printf("%d  - %d\n", text[i + 1], nickname[i]);
             i++;
         }
         i += 2;    // the offset of the timestamp is 2 chars after the end of the nickname (we have 'nickname, timestamp' ).
@@ -264,7 +237,10 @@ void queue_message(chat_message_list *msg_list,char *nickname, char *text) {
 void send_message_to_everyone(chat_message  *msg, dinamic_list *cli_data_list) {
     chat_log(msg, mode);
     pthread_mutex_lock(cli_data_list->mutex);
-    for (int i = 0; i <= cli_data_list->last; i++) {
+    if (mode == TIMESTAMP_MODE) {
+        msg->time = get_ascii_time_from_long((atol(msg->time)) / 1000000);
+    }
+    for (int i = 0; i <= cli_data_list->last; i++) {        
         dprintf(((cli_data *)(cli_data_list->list[i]))->clifd, "[%s, %s] \033[32m|\033[0m %s\n", msg->sender, msg->time, msg->message);
     }
     pthread_mutex_unlock(cli_data_list->mutex);
@@ -291,8 +267,15 @@ void *reader_start(void *info) {
         }
 
         for (int i = msg_list->message_list->last; i >= 0; i--) {
+            chat_message *msg;
+            if (mode == TIMESTAMP_MODE) {
+                msg = msg_list->message_list->list[i];
+                if ((atol(get_current_time_u()) - atol(msg->time)) < (millis_check * 1000)){ 
+                    break;
+                }
+            }
             element e = dinamic_list_pop(msg_list->message_list, 0);
-            chat_message *msg= e.value;
+            msg= e.value;
             send_message_to_everyone(msg, cli_data_list);
             msg_list->mutex->msg_n--;
             free_mesage(msg);
@@ -300,7 +283,7 @@ void *reader_start(void *info) {
         printf("\033[0;31m READER THREAD:    UNLOCKING THE MUTEX\n");
         pthread_mutex_unlock(msg_list->mutex->mutex);
 
-        usleep(1000000);  // sleep 10 millis
+        usleep(millis_check * 1000);  // sleep
     }
 }
 
@@ -313,8 +296,6 @@ int check_name(dinamic_list *l, char *n) {
         return 1;
     puts("\033[33m Checking name : lock on mutex\033[0m");
     pthread_mutex_lock(l->mutex);
-
-    printf("%ld\n", l->last);
 
     puts("\033[33m Checking name : locked\033[0m");
     int ret = 0;
