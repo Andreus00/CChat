@@ -315,7 +315,7 @@ int check_name(dinamic_list *l, char *n) {
 
 void _server_send_message(chat_message_list *msg_list, char *nickname, char *text) {
     if(mode == TIMESTAMP_MODE) {
-        char *time = get_current_time();
+        char *time = get_current_time_u();
         unsigned int msg_len = strlen(time) + strlen(text) + strlen(nickname) + 6;
         char *assembled_message = calloc(msg_len, sizeof(char));
         snprintf(assembled_message, msg_len, "[%s, %s] %s", nickname, time, text);

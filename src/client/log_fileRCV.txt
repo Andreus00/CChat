@@ -1,187 +1,105 @@
-[Andrea Sanchietti, Thu May 27 15:37:14 2021] d
+[Andrea, Fri May 28 10:44:24 2021
+] s
 
-[asdfhjklòdsfkljdsfjkl, Thu May 27 15:39:19 2021] ff
+[Aadfhasdifasdfasdf, Fri May 28 10:54:53 2021
+] d
 
-[fdsffasdfasdfasfasd, Thu May 27 15:42:58 2021] d
+[Aadfhasdifasdfasdf, Fri May 28 10:54:54 2021
+] g
 
-[gdfkjlndfgklgfd, Thu May 27 15:44:40 2021] f
+[Aadfhasdifasdfasdf, Fri May 28 10:54:54 2021
+] h
 
-[asdfjhklfsdajhksdfajkhjkhsdaf
-, Thu May 27 16:19:52 2021] d
+[Aadfhasdifasdfasdf, Fri May 28 10:54:55 2021
+] sa
 
-[asdfjhklfsdajhksdfajkhjkhsdaf
-, Thu May 27 16:19:53 2021] g
+[Aadfhasdifasdfasdf, Fri May 28 10:54:55 2021
+] d
 
-[asdfjhklfsdajhksdfajkhjkhsdaf
-, Thu May 27 16:19:53 2021] asd
+[Aadfhasdifasdfasdf, Fri May 28 10:54:56 2021
+] f
 
-[asdfjhklfsdajhksdfajkhjkhsdaf
-, Thu May 27 16:19:54 2021] fas
+[d, Fri May 28 10:55:57 2021] g
 
-[asdfjhklfsdajhksdfajkhjkhsdaf
-, Thu May 27 16:19:54 2021] f
+[d, Fri May 28 10:55:57 2021] d
 
-[asdfjhklfsdajhksdfajkhjkhsdaf
-, Thu May 27 16:19:54 2021] as
+[d, Fri May 28 10:55:58 2021] f
 
-[asdfjhklfsdajhksdfajkhjkhsdaf
-, Thu May 27 16:19:54 2021] fas
+[d, Fri May 28 10:55:58 2021] g
 
-[asdfjhklfsdajhksdfajkhjkhsdaf
-, Thu May 27 16:19:54 2021] f
+[dfs, Fri May 28 10:56:12 2021] df
 
-[asdfjhklfsdajhksdfajkhjkhsdaf
-, Thu May 27 16:19:54 2021] as
+[dfs, Fri May 28 10:56:12 2021] f
 
-[asdfjhklfsdajhksdfajkhjkhsdaf
-, Thu May 27 16:19:54 2021] gd
+[dfs, Fri May 28 10:56:13 2021] g
 
-[asdfjhklfsdajhksdfajkhjkhsdaf
-, Thu May 27 16:19:55 2021] sfg
+[dsf, Fri May 28 10:58:21 2021] df
 
-[asdfjhklfsdajhksdfajkhjkhsdaf
-, Thu May 27 16:19:55 2021] ds
+[d, Fri May 28 10:59:09 2021] f
 
-[asdfjhklfsdajhksdfajkhjkhsdaf
-, Thu May 27 16:19:55 2021] hds
+[d, Fri May 28 10:59:09 2021] a
 
-[asdfjhklfsdajhksdfajkhjkhsdaf
-, Thu May 27 16:19:55 2021] h
+[d, Fri May 28 10:59:09 2021] g
 
-[asdfjhklfsdajhksdfajkhjkhsdaf
-, Thu May 27 16:19:55 2021] fg
+[d, Fri May 28 10:59:10 2021] d
 
-[asdfjhklfsdajhksdfajkhjkhsdaf
-, Thu May 27 16:19:55 2021] s
+[d, Fri May 28 10:59:10 2021] fg
 
-[asdfjhklfsdajhksdfajkhjkhsdaf
-, Thu May 27 16:19:55 2021] dfg
+[d, Fri May 28 10:59:10 2021] fd
 
-[asdfjhklfsdajhksdfajkhjkhsdaf
-, Thu May 27 16:19:55 2021] sd
+[d, Fri May 28 10:59:10 2021] d
 
-[asdfjhklfsdajhksdfajkhjkhsdaf
-, Thu May 27 16:19:56 2021] gsd
+[d, Fri May 28 10:59:11 2021] dd
 
-[asdfjhklfsdajhksdfajkhjkhsdaf
-, Thu May 27 16:19:56 2021] g
+[d, Fri May 28 10:59:12 2021] fgdsjklhdjklhkljgkdgjdsfgkljdkg
 
-[asdfjhklfsdajhksdfajkhjkhsdaf
-, Thu May 27 16:19:56 2021] d
+[d, Fri May 28 10:59:14 2021] asdgjohdsfghjkdhfjkkjhgdfskdghjkhjkdgfhjksghjkdfkhdfg
 
-[asdfòkjlhdsfjklòdskfljòa, Thu May 27 16:59:32 2021] d
+[d, Fri May 28 10:59:16 2021] fd
 
-[asdfòkjlhdsfjklòdskfljòa, Thu May 27 16:59:32 2021] d
+[d, Fri May 28 10:59:16 2021] f
 
-[asdfòkjlhdsfjklòdskfljòa, Thu May 27 16:59:32 2021] g
+[d, Fri May 28 10:59:18 2021] r
 
-[asdfòkjlhdsfjklòdskfljòa, Thu May 27 16:59:33 2021] fd
+[d, Fri May 28 10:59:18 2021] [3~g
 
-[asdfòkjlhdsfjklòdskfljòa, Thu May 27 16:59:33 2021] s
+[d, Fri May 28 10:59:19 2021] dfg
 
-[asdfòkjlhdsfjklòdskfljòa, Thu May 27 16:59:33 2021] s
+[d, Fri May 28 10:59:19 2021] dfs
 
-[asdfòkjlhdsfjklòdskfljòa, Thu May 27 16:59:33 2021] asd
+[d, Fri May 28 10:59:19 2021] gd
 
-[ds, Thu May 27 16:59:40 2021] g
+[d, Fri May 28 10:59:19 2021] g
 
-[ds, Thu May 27 16:59:40 2021] g
+[d, Fri May 28 10:59:19 2021] ds
 
-[ds, Thu May 27 16:59:42 2021] d
+[d, Fri May 28 10:59:19 2021] g
 
-[asdfòkjlhdsfjklòdskfljòa, Thu May 27 16:59:46 2021] sdf
+[Andrea, Fri May 28 14:59:40 2021] sd
 
-[ds, Thu May 27 17:01:33 2021] ù
+[Andrea, Fri May 28 14:59:40 2021] dg
 
-[ds, Thu May 27 17:01:34 2021] dfsfasfdsfasfadsdf
+[Andrea, Fri May 28 14:59:41 2021] g
 
-[Asdnfasfwfasdf, Thu May 27 17:14:40 2021] d
+[Andrea, Fri May 28 14:59:41 2021] fdg
 
-[Asdnfasfwfasdf, Thu May 27 17:14:40 2021] g
+[Adnr, Fri May 28 15:00:07 2021] fgd
 
-[Asdnfasfwfasdf, Thu May 27 17:14:41 2021] asdf
+[Adnr, Fri May 28 15:00:08 2021] fgdfgds
 
-[Asdnfasfwfasdf, Thu May 27 17:14:42 2021] gasdfasdgfgsdgf
+[Adnr, Fri May 28 15:00:09 2021] g
 
-[Asdnfasfwfasdf, Thu May 27 17:15:08 2021] fgdhjklsdfjklhjhklsdfjkfsladkjfdjdkflsasjkhdlògaheròifoshdkjanerhjknierfsdjkhlnim, oureasdfjhknlimo, ersfdjknhliom ,erfsdjhknluimofersdjhknuilm ,rfesdjhnkuilmrfesdhjknuilorfesdhjnuklreifsdhjnuikolorfedshjunikolrfedshjunkiolrfedshjunikolòrfedsòjuhiknolòrdfeshjknuiolòredfshjuinkolòrefsdjhunikrolfòedshjrnueifkdshjunikoòlfredshjunikrfedshjunikerfsdhjunikòolerfsdhjunikòerfsdahjunikò.fredshujnifrke
+[Andrea, Fri May 28 15:00:12 2021] gdfgds
 
-[Andrea< asdfasdfasdfasdfasdfjkhlsdfasdafjhksdfjhkldsf, Thu May 27 17:15:37 2021] d
+[Andrea, Fri May 28 15:00:12 2021] fgsd
 
-[Andrea< asdfasdfasdfasdfasdfjkhlsdfasdafjhksdfjhkldsf, Thu May 27 17:15:38 2021] g
+[Adnr, Fri May 28 15:00:15 2021] fgsdfgdf
 
-[Andrea< asdfasdfasdfasdfasdfjkhlsdfasdafjhksdfjhkldsf, Thu May 27 17:15:38 2021] t
+[Adnr, Fri May 28 15:00:16 2021] dsgdsf
 
-[Andrea< asdfasdfasdfasdfasdfjkhlsdfasdafjhksdfjhkldsf, Thu May 27 17:15:40 2021] dsgdgadgf
+[asfs, Fri May 28 15:00:24 2021] dfasijasdg
 
-[Andrea< asdfasdfasdfasdfasdfjkhlsdfasdafjhksdfjhkldsf, Thu May 27 17:18:00 2021] er
+[asfs, Fri May 28 15:00:26 2021] gdfgdfgdsfgdjkhlnòfdashjkòadfshjkasdhjkasfdhjkfdashjksfdjkfasjhksdf
 
-[Andrea< asdfasdfasdfasdfasdfjkhlsdfasdafjhksdfjhkldsf, Thu May 27 17:18:00 2021] rqw
-
-[Andrea< asdfasdfasdfasdfasdfjkhlsdfasdafjhksdfjhkldsf, Thu May 27 17:18:00 2021] erwe
-
-[fdsakaskfdasdf, Thu May 27 17:23:44 2021] sadfas
-
-[fdsakaskfdasdf, Thu May 27 17:23:44 2021] df
-
-[fdsakaskfdasdf, Thu May 27 17:23:45 2021] asdfasdjkhfhjasdfjhkasdhjkfahkjlsf
-
-[fdsakaskfdasdf, Thu May 27 17:23:48 2021] sdfasdjklhfhjasòddfhjsahjdfhjashjdfasjkhdfasdfhwhruijahjkwjuhikrdewauhjiekwdsuhjikrauhjikwerasfduhjikferdasfurhjeaikdfreuhjikfreauhjikfaruhjikfreuhjireuhjreuhjariedhurfedhujirkefdasuhjikrfdeuhijrfedasuhijrf
-
-[fdsakaskfdasdf, Thu May 27 17:23:54 2021] sdfasdjklhfhjasòddfhjsahjdfhjashjdfasjkhdfasdfhwhruijahjkwjuhikrdewauhjiekwdsuhjikrauhjikwerasfduhjikferdasfurhjeaikdfreuhjikfreauhjikfaruhjikfreuhjireuhjreuhjariedhurfedhujirkefdasuhjikrfdeuhijrfedasuhijrfe
-
-[fdsakaskfdasdf, Thu May 27 17:23:59 2021] sdfasdjklhfhjasòddfhjsahjdfhjashjdfasjkhdfasdfhwhruijahjkwjuhikrdewauhjiekwdsuhjikrauhjikwerasfduhjikferdasfurhjeaikdfreuhjikfreauhjikfaruhjikfreuhjireuhjreuhjariedhurfedhujirkefdasuhjikrfdeuhijrfedasuhijrfe
-
-[fdsakaskfdasdf, Thu May 27 17:24:03 2021] sdfasdjklhfhjasòddfhjsahjdfhjashjdfasjkhdfasdfhwhruijahjkwjuhikrdewauhjiekwdsuhjikrauhjikwerasfduhjikferdasfurhjeaikdfreuhjikfreauhjikfaruhjikfreuhjireuhjreuhjariedhurfedhujirkefdasuhjikrfdeuhijrfedasuhijrfedsdfasdjklhfhjasòddfhjsahjdfhjashjdfasjkhdfasdfhwhruijahjkwjuhikrdewauhjiekwdsuhjikrauhjikwerasfduhjikferdasfurhjeaikdfreuhjikfreauhjikfaruhjikfreuhjireuhjreuhjariedhurfedhujirkefdasuhjikrfdeuhijrfedasuhijrfedsdfasdjklhfhjasòddfhjsahjdfhjashjdfasjkhdfasdfhwhruijahjkwjuhikrdewauhjiekwdsuhjikrauhjikwerasfduhjikferdasfurhjeaikdfreuhjikfreauhjikfaruhjikfreuhjireuhjreuhjariedhurfedhujirkefdasuhjikrfdeuhijrfedasuhijrfedsdfasdjklhfhjasòddfhjsahjdfhjashjdfasjkhdfasdfhwhruijahjkwjuhikrdewauhjiekwdsuhjikrauhjikwerasfduhjikferdasfurhjeaikdfreuhjikfreauhjikfaruhjikfreuhjireuhjreuhjariedhurfedhujirkefdasuhjikrfdeuhijrfedasuhijrfedsdfasdjklhfhjasòddfhjsahjdfhjashjdfasjkhdfasdfhwhruijahjkwjuhikrdewauhjiekwdsuhjikrauhjikwerasfduhjikferdasfurhjeaikdfreuhjikfreauhjikfaruhjikfreuhjireuhjreuhjariedhurfedhujirkefdasuhjikrfdeuhijrfedasuhijrfed
-
-[fdsakaskfdasdf, Thu May 27 17:24:18 2021] sdfasdjklhfhjasòddfhjsahjdfhjashjdfasjkhdfasdfhwhruijahjkwjuhikrdewauhjiekwdsuhjikrauhjikwerasfduhjikferdasfurhjeaikdfreuhjikfreauhjikfaruhjikfreuhjireuhjreuhjariedhurfedhujirkefdasuhjikrfdeuhijrfedasuhijrfed
-
-[fdsakaskfdasdf, Thu May 27 17:24:21 2021] sdfasdjklhfhjasòddfhjsahjdfhjashjdfasjkhdfasdfhwhruijahjkwjuhikrdewauhjiekwdsuhjikrauhjikwerasfduhjikferdasfurhjeaikdfreuhjikfreauhjikfaruhjikfreuhjireuhjreuhjariedhurfedhujirkefdasuhjikrfdeuhijrfedasuhijrfedsdfasdjklhfhjasòddfhjsahjdfhjashjdfasjkhdfasdfhwhruijahjkwjuhikrdewauhjiekwdsuhjikrauhjikwerasfduhjikferdasfurhjeaikdfreuhjikfreauhjikfaruhjikfreuhjireuhjreuhjariedhurfedhujirkefdasuhjikrfdeuhijrfedasuhijrfed
-
-[sadfhjklfdsjkhjhkdsf, Thu May 27 17:25:27 2021] dsfahjdfsajhkdsfhjk
-
-[sadfhjklfdsjkhjhkdsf, Thu May 27 17:25:30 2021] sdfasdjklhfhjasòddfhjsahjdfhjashjdfasjkhdfasdfhwhruijahjkwjuhikrdewauhjiekwdsuhjikrauhjikwerasfduhjikferdasfurhjeaikdfreuhjikfreauhjikfaruhjikfreuhjireuhjreuhjariedhurfedhujirkefdasuhjikrfdeuhijrfedasuhijrfed
-
-[sadfhjklfdsjkhjhkdsf, Thu May 27 17:25:32 2021] sdfasdjklhfhjasòddfhjsahjdfhjashjdfasjkhdfasdfhwhruijahjkwjuhikrdewauhjiekwdsuhjikrauhjikwerasfduhjikferdasfurhjeaikdfreuhjikfreauhjikfaruhjikfreuhjireuhjreuhjariedhurfedhujirkefdasuhjikrfdeuhijrfedasuhijrf
-
-[sadfhjklfdsjkhjhkdsf, Thu May 27 17:25:35 2021] sdfasdjklhfhjasòddfhjsahjdfhjashjdfasjkhdfasdfhwhruijahjkwjuhikrdewauhjiekwdsuhjikrauhjikwerasfduhjikferdasfurhjeaikdfreuhjikfreauhjikfaruhjikfreuhjireuhjreuhjariedhurfedhujirkefdasuhjikrfdeuhijrfedasuhijrfe
-
-[sadfhjklfdsjkhjhkdsf, Thu May 27 17:25:38 2021] sdfasdjklhfhjasòddfhjsahjdfhjashjdfasjkhdfasdfhwhruijahjkwjuhikrdewauhjiekwdsuhjikrauhjikwerasfduhjikferdasfurhjeaikdfreuhjikfreauhjikfaruhjikfreuhjireuhjreuhjariedhurfedhujirkefdasuhjikrfdeuhijrfedasuhijr
-
-[sadfhjklfdsjkhjhkdsf, Thu May 27 17:25:41 2021] sdfasdjklhfhjasòddfhjsahjdfhjashjdfasjkhdfasdfhwhruijahjkwjuhikrdewauhjiekwdsuhjikrauhjikwerasfduhjikferdasfurhjeaikdfreuhjikfreauhjikfaruhjikfreuhjireuhjreuhjariedhurfedhujirkefdasuhjikrfdeuhijrfedasuhijrfedsdfasdjklhfhjasòddfhjsahjdfhjashjdfasjkhdfasdfhwhruijahjkwjuhikrdewauhjiekwdsuhjikrauhjikwerasfduhjikferdasfurhjeaikdfreuhjikfreauhjikfaruhjikfreuhjireuhjreuhjariedhurfedhujirkefdasuhjikrfdeuhijrfedasuhijrfedsdfasdjklhfhjasòddfhjsahjdfhjashjdfasjkhdfasdfhwhruijahjkwjuhikrdewauhjiekwdsuhjikrauhjikwerasfduhjikferdasfurhjeaikdfreuhjikfreauhjikfaruhjikfreuhjireuhjreuhjariedhurfedhujirkefdasuhjikrfdeuhijrfedasuhijrfed
-
-[Andrea Sanchiett , Thu May 27 18:02:33 2021] ciao
-
-[Andrea Sanchiett , Thu May 27 18:02:36 2021] Come va=
-
-[Andrea Sanchiett , Thu May 27 18:02:37 2021] ?
-
-[d, Thu May 27 20:02:25 2021] d
-
-[sdafjhkljhfdsjhasfdfhjjkhasdf, Thu May 27 20:02:29 2021] d
-
-[sdafjhkljhfdsjhasfdfhjjkhasdf, Thu May 27 20:02:31 2021] f
-
-[Asdfijasd, Thu May 27 20:04:42 2021] hi
-
-[And, Fri May 28 01:14:59 2021] s
-
-[Asd, Fri May 28 01:17:32 2021] d
-
-[Asd, Fri May 28 01:17:33 2021] g
-
-[Asd, Fri May 28 01:17:33 2021] f
-
-[Asd, Fri May 28 01:17:33 2021] g
-
-[Asd, Fri May 28 01:17:33 2021] sfg
-
-[Asd, Fri May 28 01:17:34 2021] fgfdgdf
-
-[And, Fri May 28 01:17:41 2021] gfdg
-
-[sadfasfhsfhjahsjkfhsaòjdf, Fri May 28 01:21:12 2021] d
-
-[sadfasfhsfhjahsjkfhsaòjdf, Fri May 28 01:21:12 2021] dg
-
-[sadfasfhsfhjahsjkfhsaòjdf, Fri May 28 01:21:13 2021] a
+[Adnr, Fri May 28 15:00:29 2021] versfadhuijkhjunaesrdfvch<junraefdshjunikrfaesdhjun
 

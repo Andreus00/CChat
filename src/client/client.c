@@ -145,6 +145,10 @@ int start_chat(login_data *log_data) {
     // Creazione del reader thread. Ad esso viene passato log_data
     pthread_create(&tid, NULL, &reader, (void *)log_data);
 
+    // viene inizializzato il chat_message con all'interno il nickname e il messaggio
+    chat_message *new_message = malloc(sizeof(chat_message));
+    new_message->sender = log_data->nickname;
+
     /*
     while all'interno del quale:
             1) viene letto l'input dell'utente con la funzione readinput
@@ -169,9 +173,6 @@ int start_chat(login_data *log_data) {
 
         // check su quanto è stato letto
         if(strlen(buff) > 1) {
-            // viene inizializzato il chat_message con all'interno il nickname e il messaggio
-            chat_message *new_message = malloc(sizeof(chat_message));
-            new_message->sender = log_data->nickname;
             new_message->message = buff;
             // se mode == RECEIVE_MODE è il server a decidere il timestamp, quindi al
             // client serve solo per il log e basta avere il current time con il format Day Month dd hh:mm:ss yyyy.
@@ -196,6 +197,11 @@ int start_chat(login_data *log_data) {
             }
             // faccio il log del messaggio
             chat_log(new_message, mode);
+
+            if (mode == TIMESTAMP_MODE) free(new_message->time);    // la funzione get_current_time_u, usata solo se 
+                                                                    // mode == TIMESTAMP_MODE, alloca in memoria il time.
+                                                                    // bisogna quindi liberarla una volta che non serve più
+
         }
         // rilascio la memoria allocata dalla readinput
         free(buff);

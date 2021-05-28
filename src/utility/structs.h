@@ -54,10 +54,15 @@ typedef struct {
     chat_message_list *msg_list;    // putnatore alla lista dei messaggi
 } receiver_thread_param;
 
+/*
+struttura che racchiude le informazioni che servono al reader thread.
+*/
 typedef struct {
-    dinamic_list *cli_data_list;
-    chat_message_list *msg_list;
+    dinamic_list *cli_data_list;    // puntatore alla lista dei clienti
+    chat_message_list *msg_list;    // puntatore alla lista dei messaggi
 } reader_thread_param;
 
-
+/*
+enum che racchiude le due mode con cui può essere lancato il server.
+*/
 enum chat_mode {TIMESTAMP_MODE, RECEIVE_MODE};
