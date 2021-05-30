@@ -289,12 +289,18 @@ int main(int argc, char *argv[]) {
         else {
             // allocazione in memoria dello spazio per i parametri da passare al receiver thread
             receiver_info *t_info = malloc(sizeof(receiver_info));
-            t_info->receiver_param = malloc(sizeof(receiver_thread_param)); // allocazione per i parametri
-            t_info->receiver_param->cli_data_list = cli_data_list;  // set del puntatore alla lista dei client
-            t_info->receiver_param->msg_list = msg_list;            // set del puntatore alla lista dei messaggi
-            t_info->receiver_param->data = malloc(sizeof(cli_data));    // allocazione per i dati del client
-            t_info->receiver_param->data->clifd = clifd;                // file descriptor del client
-            t_info->receiver_param->data->cli_addr = cli_addr;          // puntatore al cli_addr del client
+            // allocazione per i parametri
+            t_info->receiver_param = malloc(sizeof(receiver_thread_param)); 
+            // set del puntatore alla lista dei client
+            t_info->receiver_param->cli_data_list = cli_data_list;  
+            // set del puntatore alla lista dei messaggi
+            t_info->receiver_param->msg_list = msg_list;
+            // allocazione per i dati del client
+            t_info->receiver_param->data = malloc(sizeof(cli_data));
+            // file descriptor del client
+            t_info->receiver_param->data->clifd = clifd;
+            // puntatore al cli_addr del client
+            t_info->receiver_param->data->cli_addr = cli_addr;          
             // inizializzazione del mutex e della cond
             t_info->mutex = malloc(sizeof(pthread_mutex_t));
             t_info->cond = malloc(sizeof(pthread_cond_t));
@@ -549,8 +555,8 @@ void _server_send_message(chat_message_list *msg_list, char *nickname, char *tex
 Funzione usata dai thread che gestiscono la connessione con i client e la ricezione dei messaggi.
 All'interno della funzione viene letto il nickname e viene inviata al client una risposta di accettazione/rifiuto
 del nickname, una vlta accettato il nickname viene comunicata al client la mode, viene aggiunto il client alla lista
-dei client, viene mandato a tutti il messaggio di join e infine si entra in un ciclo all'interno del quale il thread
-attende che il client scriva un mesaggio.
+dei client, viene mandato a tutti il messaggio di join, e infine si entra in un ciclo all'interno del quale il thread
+attende che il client scriva un mesaggio per metterlo nella queue.
 */
 int chat_start(void *info) {
     #define NICK_SIZE 200
