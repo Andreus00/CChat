@@ -45,10 +45,10 @@ void chat_log(chat_message *msg, enum chat_mode m) {
     
     // scelta del suffisso in base alla mode
     if(m == RECEIVE_MODE) {
-        strcat(log_file_name, "RCV.txt");
+        strcat(log_file_name, "RCV.log");
     }
     else {
-        strcat(log_file_name, "TMS.txt");
+        strcat(log_file_name, "TMS.log");
     }
 
     // calcolo della lunghezza del messaggio e suo assemblamento
