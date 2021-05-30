@@ -10,6 +10,10 @@ make all
 Il compilato verrà messo nella cartella bin (anche essa creata dal makefile).
 I file di log verranno messi nella stessa cartella del programma client o server.
 
+<hr class="rounded">
+
+<h2>Server</h2>
+
 Per far partire il server spostarsi nella cartella bin/server e far partire il programma
 ```html
 ./server [port] [mode] [millis_check]
@@ -30,3 +34,15 @@ Per far partire il server spostarsi nella cartella bin/server e far partire il p
 <strong>millis_check</strong> indica quanti millisecondi il reader thread deve andare in sleep una volota inviati i messaggi della coda. 
 In TIMESTAMP_MODE questo argomento influenza anche quanto un messaggio deve aspettare in coda prima di essere mandato.
 
+<hr class="rounded">
+
+<h2>Client</h2>
+
+il client non richiede argomenti. Per far partire il client basta
+```html
+./client
+```
+
+
+Nella src c'è anche una cartella client_2. Essa contiene il progetto iniziale della gui per il client ormai abbandonato a causa di crash che avvolte avvengono
+durante l'inizializzazione della gui e senza un apparente motivo.
