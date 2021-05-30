@@ -9,8 +9,9 @@ e inviato i messaggi.
 
 Il server usa il thread principale per inizializzare le impostazioni passate da linea di comando, per aprire il socket
 e per iniziare ad ascoltare sul socket.
-Ogni volta che una connessione con un nuovo client viene accettata, il server crea un thread che dovrà gestire l'arrivo degli input da parte dell'utente.
-A questo nuovo thread vengono passate le informazioni del client impacchettate in una struttura receiver_thread_param.
+Ogni volta che una connessione con un nuovo client viene accettata, il server prende un thread dalla thread pool o crea un thread che dovrà gestire
+l'arrivo degli input da parte dell'utente.
+A questo thread vengono passate le informazioni del client impacchettate in una struttura receiver_thread_param.
 
 Il reader thread invece è quello al quale vengono passati i messaggi arrivati (i messaggi vengono accodati in una lista) e ha il compito di
 rispedirli a tutti i client. Per fare ciò dispone di un puntatore alla lista dei messaggi (usa una dinamic_list come fosse una queue) e un puntatore alla
@@ -43,14 +44,21 @@ in microsecondi anziché in secondi
 #include "../utility/chat_log.h"
 #include "../utility/chat_message.h"
 
+// numero di thread della thread pool
+#define THREAD_POOL_N 10
+
+void * receiver_start(void *);
+void *reader_start(void *);
+
+// numero di thread disponibili e mutex da usare con available_threads
+int available_threads = THREAD_POOL_N;
+pthread_mutex_t *available_threads_mutex;
+
 // mode del server. Viene inizializzato un avolta parsati gli argomenti del main
 enum chat_mode mode;
 // millisecondi che deve aspettare il reader thread durante lo sleep e millisecondi
 // che devono aspettare i messaggi prima di essere inoltrati.
 int millis_check = 1;
-
-void *chat_start(void *);
-void *reader_start(void *);
 /*
 Funzione che stampa il messaggio di errore e chiama la exit(1)
 */
@@ -190,7 +198,45 @@ int main(int argc, char *argv[]) {
     // puntatore alla struttura da inizializzare e da passare ai reader thread
     receiver_thread_param *receiver_param;
     // parametro da passare alla accept
-    socklen_t n = sizeof(struct sockaddr_in);   
+    socklen_t n = sizeof(struct sockaddr_in);
+
+    available_threads_mutex = malloc(sizeof(pthread_mutex_t));
+    pthread_mutex_init(available_threads_mutex, NULL);
+
+    // inizializzazione della thread pool
+    dinamic_list *thread_list = dinamic_list_new();
+    for(int i = 0; i < THREAD_POOL_N; i++) {
+        // alloco lo spazio per le informazioni che serviranno al thread
+        receiver_info *t_info = malloc(sizeof(receiver_info));
+        // alloco lo spazio per i parametri della chat
+        t_info->receiver_param = malloc(sizeof(receiver_thread_param));
+        // imposto i puntatori alla lista dei client e alla lista dei messaggi
+        t_info->receiver_param->cli_data_list = cli_data_list;
+        t_info->receiver_param->msg_list = msg_list;
+        // alloco lo spazio per le informazioni del client
+        t_info->receiver_param->data = malloc(sizeof(cli_data));
+        // alloco e inizializzo il mutex e la cond
+        t_info->mutex = malloc(sizeof(pthread_mutex_t));
+        t_info->cond = malloc(sizeof(pthread_cond_t));
+        pthread_mutex_init(t_info->mutex, NULL);
+        pthread_cond_init(t_info->cond, NULL);
+        // Impostro kill a 0 per dire che il thread non deve mai terminare, ma fare un loop continuo e attendere ogni volta
+        // che il thread principale inserisca le informazioni riguardanti un client appena connesso all'interno di t_info->receiver_param->data
+        t_info->kill = 0;
+        // imposto running a 0 per dire che ancora non sono validi i valori all'interno di t_info->receiver_param->data e che quindi il
+        // thread deve andare in attesa.
+        t_info->running = 0;
+        // creo il thread e controllo gli errori
+        if (pthread_create(&t_info->tid, 0, &receiver_start, t_info)) {
+            perror("Error while initializing a thread of the thread pool");
+            pthread_mutex_lock(available_threads_mutex);
+            available_threads--;
+            pthread_mutex_unlock(available_threads_mutex);
+        }
+        // aggiungo il thread alla lista della thread pool
+        dinamic_list_add(thread_list, t_info);
+        printf("Thread %d initialized\n", i);
+    }
 
     // while infinito al cui interno vengono accettati i client e passati ai reader thread
     while (1) {
@@ -207,18 +253,66 @@ int main(int argc, char *argv[]) {
             continue;
         }
         printf("Connection acepted: %d\n", clifd);
-        // allocazione in memoria dello spazio per i parametri da passare al receiver thread
-        receiver_param = malloc(sizeof(receiver_thread_param));
-        receiver_param->cli_data_list = cli_data_list;      // puntatore alla lista dei client
-        receiver_param->msg_list = msg_list;                // puntatore alla message list
-        receiver_param->data = malloc(sizeof(cli_data));    // puntatore alla struttura cli_data contenente le informazioni del client appena accettato
-        receiver_param->data->clifd = clifd;                // file edescriptor del client
-        receiver_param->data->cli_addr = cli_addr;          // puntatore al cli_addr del client
-        // creazione del reader thread e check sugli errori
-        if (pthread_create(&tid, 0, &chat_start, receiver_param) != 0){
-            perror("Error while creating the thread");
-            close(clifd);
+        // ora devo passare il client a un thread.
+        // Se ci sono thread della thread pool liberi uso uno di essi per il client appena accettato.
+        pthread_mutex_lock(available_threads_mutex);
+        if (available_threads > 0) {
+            // trovo il primo thread della thread_pool in attesa e gli passo le informazioni del client.
+            pthread_mutex_lock(thread_list->mutex);
+            int first_free_thread = 0;
+            while (first_free_thread < THREAD_POOL_N) { // while al cui interno vengono scorsi i thread della thread pool
+                receiver_info *receiver_thread = (receiver_info *) thread_list->list[first_free_thread];
+                // check per controllare se il thread è libero.
+                pthread_mutex_lock(receiver_thread->mutex);
+                if (!receiver_thread->running) {
+                    // se è libero imposto il thread a running, faccio puntare i parametri del thread alla struttura cli_addr e imposto il clifd del client
+                    // appena accettato. Infine mando una signal al thread per dirgli di far partire la comunicazione con il client.
+                    receiver_thread->running = 1;
+                    receiver_thread->receiver_param->data->cli_addr = cli_addr;
+                    receiver_thread->receiver_param->data->clifd = clifd;
+                    pthread_cond_signal(receiver_thread->cond);
+                    pthread_mutex_unlock(receiver_thread->mutex);
+                    // aggiorno il numero di thread disponibili
+                    available_threads--;
+                    printf("Thread %d used. Threadpool index : %d\n",(int) receiver_thread->tid, first_free_thread);
+                    break;
+                }
+                else pthread_mutex_unlock(receiver_thread->mutex);
+                first_free_thread++;
+            }
+            pthread_mutex_unlock(thread_list->mutex);
+            
         }
+        // se invece non ci sono thread disponibili dalla thread pool viene creato un nuovo thread con kill = 1 in modo da farlo ritornare una volta che
+        // il client si disconnette, running = 1 in modo da far partire subito la chat senza aspettare la signal della cond, i parametri che servono
+        // per la chat in t_info->receiver_param
+        else {
+            // allocazione in memoria dello spazio per i parametri da passare al receiver thread
+            receiver_info *t_info = malloc(sizeof(receiver_info));
+            t_info->receiver_param = malloc(sizeof(receiver_thread_param)); // allocazione per i parametri
+            t_info->receiver_param->cli_data_list = cli_data_list;  // set del puntatore alla lista dei client
+            t_info->receiver_param->msg_list = msg_list;            // set del puntatore alla lista dei messaggi
+            t_info->receiver_param->data = malloc(sizeof(cli_data));    // allocazione per i dati del client
+            t_info->receiver_param->data->clifd = clifd;                // file descriptor del client
+            t_info->receiver_param->data->cli_addr = cli_addr;          // puntatore al cli_addr del client
+            // inizializzazione del mutex e della cond
+            t_info->mutex = malloc(sizeof(pthread_mutex_t));
+            t_info->cond = malloc(sizeof(pthread_cond_t));
+            pthread_mutex_init(t_info->mutex, NULL);
+            pthread_cond_init(t_info->cond, NULL);
+            // set di kill a 1 in modo da far terminare il thread una volta che la connessione al client termina
+            t_info->kill = 1;
+            // set di running a 1 per non far aspettare al thread una signal
+            t_info->running = 1;
+            // creazione e check del thread
+            if (pthread_create(&t_info->tid, 0, &receiver_start, t_info)) {
+                perror("Error while initializing a thread of the thread pool");
+            }
+            else
+                printf("Thread %d used.\n",(int) t_info->tid);
+        }
+        pthread_mutex_unlock(available_threads_mutex);  // rilascio il lock usato per la variabile contatore available_threads
+        
     }
 }
 /*
@@ -458,7 +552,7 @@ del nickname, una vlta accettato il nickname viene comunicata al client la mode,
 dei client, viene mandato a tutti il messaggio di join e infine si entra in un ciclo all'interno del quale il thread
 attende che il client scriva un mesaggio.
 */
-void *chat_start(void *info) {
+int chat_start(void *info) {
     #define NICK_SIZE 200
     // recupero delle informazioni dall'argomento passato in input
     receiver_thread_param *param = (receiver_thread_param *) info;
@@ -481,7 +575,7 @@ void *chat_start(void *info) {
         if (nickname == NULL) {
             printf("\033[33m Client %d disconnected\n\033[0m", clifd);
             close(clifd);
-            return NULL;
+            return -1;
         }
         // sostituisco uno \0 al posto dello \n
         nickname[strcspn(nickname, "\n\0")] = '\0';
@@ -511,22 +605,81 @@ void *chat_start(void *info) {
         // dalle informazioni allocate riguardanti il client.
         if (buffer == NULL) {
             close(clifd);
-            cli_data *cli = dinamic_list_remove_element(cli_data_list, (void *) data);
-            if (cli == NULL) {
+            if (dinamic_list_remove_element(cli_data_list, (void *) data) == NULL) {
                 puts("\033[33m USER NOT FOUND\033[0m");
             }
             _server_send_message(msg_list, data->nickname, "\033[31m-- Left the chat\n\033[0m");
-            free(cli->nickname);
-            free(cli->cli_addr);
-            free(cli);
-            free(buffer);
-            return data;
-        }
-        // se invece è stato letto qualcosa, il messaggio viene accodato.
-        else {
+            // aspetta che venga mandato il messaggio per liberare lo spazio allocato per il nickname e per le informazioni riguardanti l'address del client
+            sleep(1);   
+            free(data->nickname);
+            data->nickname = NULL;
+            free(data->cli_addr);
+            data->cli_addr = NULL;
+            data->clifd = -1;
+            return 1;
+        }    
+        else {// se invece è stato letto qualcosa, il messaggio viene accodato.
             queue_message(msg_list, nickname, buffer);
         }
     }
+}
+
+/*
+Funzione che gestisce sia i thread della thread pool che i thread in più creati per i client.
+Riceve una struct di tipo receiver_info al cui interno ci sono:
+- receiver_thread_param *receiver_param : la struttura da passare alla funzione chat start
+- pthread_t tid : il tid del thread
+- pthread_cond_t *cond : la condition usata dal thread per capire se deve far partire la chat
+- pthread_mutex_t *mutex : il mutex del thread (usato con la condition)
+- int running : intero che server per capire se il thread sta runnando o no. viene lockato il mutex prima di accedere a questa variabile
+- int kill : indica se il thread deve fermarsi e ritornare una volta ceh il client attualmente connesso si scollega.
+*/
+void * receiver_start(void *info) {
+    // recupero delle informazioni passate dal main thread
+    receiver_info *rec_info = (receiver_info *) info;
+    do {
+        // lock sul mutex delle informazioni di questo thread e controllo sulla variabile running.
+        // Se running è 1 vuol dire che le informazioni all'interno di rec_info->receiver_param riguardano un client che si
+        // è appena connesso e con il quale bisogna far partire la chat.
+        // Se invece running è 0 il thread va in attesa che il thread principale metta all'interno di rec_info->receiver_param informazioni
+        // valide riguardanti un client che si è appena connesso.
+        // I thread della thread pool si potranno fermare in attesa mentre i thread creati per servire i client quanto nella thread pool
+        // non ci soo thread liberi non si fermeranno mai ad aspettare (dato che devono essere dei thread "one shot" e devono terminare una volta
+        // completato il loro compito).
+        pthread_mutex_lock(rec_info->mutex);
+        if(!rec_info->running) {
+            puts("Going to sleep");
+            pthread_cond_wait(rec_info->cond, rec_info->mutex);
+            puts("unlocked");
+        }
+        // a questo punto le informazioni all'interno di rec_info->receiver_param riguardano un client collegato in attesa di iniziare la chat.
+        // lascio il lock e chiamo la funzione chat_start.
+        pthread_mutex_unlock(rec_info->mutex);
+        puts("starting chat");
+        chat_start(rec_info->receiver_param);
+        
+        // una volta finita la chat imposto running a 0
+        pthread_mutex_lock(rec_info->mutex);
+        rec_info->running = false;
+        pthread_mutex_unlock(rec_info->mutex);
+
+        // se il thread non deve essere killato perchè fa parte della thread pool va ad aumentare il contatore dei thread disponibili.
+        if (!rec_info->kill) {
+            pthread_mutex_lock(available_threads_mutex);
+            available_threads++;   // se il thread non deve ritornare, kill è 0. Quindi il thread torna in attesa nella thread pool
+            pthread_mutex_unlock(available_threads_mutex);
+        }
+
+    } while (!rec_info->kill);  // se il thread non deve ritornare (e fa quindi parte della thread pool) cicla e va ad aspettare che il main thread
+                                // inserisca dei dati validi in rec_info->receiver_param
+    
+    // se invece il thread deve terminare va ad eliminare dall'heap tutte le strutture che non serviranno più e ritorna
+    free(rec_info->cond);
+    free(rec_info->mutex);
+    free(rec_info->receiver_param->data);
+    free(rec_info->receiver_param);
+    free(rec_info);
+    return NULL;
 }
 
 

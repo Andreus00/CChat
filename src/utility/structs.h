@@ -54,6 +54,18 @@ typedef struct {
 } receiver_thread_param;
 
 /*
+Struttura usata per mantenere le informazioni riguardanti i thread attualmente attivi.
+*/
+typedef struct { 
+    receiver_thread_param *receiver_param;  // parametri da passare al thread riguardanti il client
+    pthread_t tid;  // tid del thread
+    pthread_mutex_t *mutex; // mutex usato con la cond
+    pthread_cond_t *cond;   // cond usata per attendere che il thread principale metta le informazioni riguardanti il client nel receiver_param
+    int running;    // intero che indica se il thread deve runanre la task. Usato per la condition. (1 per runnare e 0 per non runnare)
+    int kill;   // intero che indica se, una volta completata la task, il thread ritornare o deve rimanere in attesa di un altra task. (0 per non killare, 1 per killare)
+} receiver_info;
+
+/*
 struttura che racchiude le informazioni che servono al reader thread.
 */
 typedef struct {
