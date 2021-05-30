@@ -1,153 +1,20 @@
-[Andrea, Fri May 28 10:44:24 2021
-] [32m-- Join the chat
+[Andrea , Sun May 30 09:47:28 2021] [32m-- Join the chat
 [0m
-[Andrea, Fri May 28 10:44:24 2021
-] s
+[Andrea , Sun May 30 09:47:30 2021] hi
 
-[Andrea, Fri May 28 10:44:25 2021
-] [31m-- Left the chat
+[Andrea , Sun May 30 09:47:32 2021] hielo
+
+[Andrea , Sun May 30 09:47:34 2021] sdfsdfsdfj
+
+[Juan, Sun May 30 09:47:53 2021] [32m-- Join the chat
 [0m
-[Aadfhasdifasdfasdf, Fri May 28 10:54:53 2021
-] [32m-- Join the chat
+[Juan, Sun May 30 09:47:56 2021] helo
+
+[Andrea , Sun May 30 09:48:01 2021] helo
+
+[Juan, Sun May 30 09:48:05 2021] basi?
+
+[, Sun May 30 09:48:08 2021] [31m-- Left the chat
 [0m
-[Aadfhasdifasdfasdf, Fri May 28 10:54:53 2021
-] d
-
-[Aadfhasdifasdfasdf, Fri May 28 10:54:54 2021
-] g
-
-[Aadfhasdifasdfasdf, Fri May 28 10:54:54 2021
-] h
-
-[Aadfhasdifasdfasdf, Fri May 28 10:54:55 2021
-] sa
-
-[Aadfhasdifasdfasdf, Fri May 28 10:54:55 2021
-] d
-
-[Aadfhasdifasdfasdf, Fri May 28 10:54:56 2021
-] f
-
-[Aadfhasdifasdfasdf, Fri May 28 10:55:49 2021
-] [31m-- Left the chat
-[0m
-[d, Fri May 28 10:55:56 2021
-] [32m-- Join the chat
-[0m
-[d, Fri May 28 10:55:57 2021
-] g
-
-[d, Fri May 28 10:55:57 2021
-] d
-
-[d, Fri May 28 10:55:58 2021
-] f
-
-[d, Fri May 28 10:55:58 2021
-] g
-
-[d, Fri May 28 10:56:00 2021
-] [31m-- Left the chat
-[0m
-[dfs, Fri May 28 10:56:12 2021] [32m-- Join the chat
-[0m
-[dfs, Fri May 28 10:56:12 2021] df
-
-[dfs, Fri May 28 10:56:12 2021] f
-
-[dfs, Fri May 28 10:56:13 2021] g
-
-[dfs, Fri May 28 10:56:13 2021] [31m-- Left the chat
-[0m
-[dsf, Fri May 28 10:58:20 2021] [32m-- Join the chat
-[0m
-[dsf, Fri May 28 10:58:21 2021] df
-
-[dsf, Fri May 28 10:58:21 2021] gs
-
-[dsf, Fri May 28 10:58:21 2021] [31m-- Left the chat
-[0m
-[d, Fri May 28 10:59:09 2021] [32m-- Join the chat
-[0m
-[d, Fri May 28 10:59:09 2021] f
-
-[d, Fri May 28 10:59:09 2021] a
-
-[d, Fri May 28 10:59:09 2021] g
-
-[d, Fri May 28 10:59:10 2021] d
-
-[d, Fri May 28 10:59:10 2021] fg
-
-[d, Fri May 28 10:59:10 2021] fd
-
-[d, Fri May 28 10:59:10 2021] d
-
-[d, Fri May 28 10:59:11 2021] dd
-
-[d, Fri May 28 10:59:12 2021] fgdsjklhdjklhkljgkdgjdsfgkljdkg
-
-[d, Fri May 28 10:59:14 2021] asdgjohdsfghjkdhfjkkjhgdfskdghjkhjkdgfhjksghjkdfkhdfg
-
-[d, Fri May 28 10:59:16 2021] fd
-
-[d, Fri May 28 10:59:16 2021] f
-
-[d, Fri May 28 10:59:18 2021] r
-
-[d, Fri May 28 10:59:18 2021] [3~g
-
-[d, Fri May 28 10:59:19 2021] dfg
-
-[d, Fri May 28 10:59:19 2021] dfs
-
-[d, Fri May 28 10:59:19 2021] gd
-
-[d, Fri May 28 10:59:19 2021] g
-
-[d, Fri May 28 10:59:19 2021] ds
-
-[d, Fri May 28 10:59:19 2021] g
-
-[d, Fri May 28 10:59:20 2021] [31m-- Left the chat
-[0m
-[Andrea, Fri May 28 14:59:39 2021] [32m-- Join the chat
-[0m
-[Andrea, Fri May 28 14:59:40 2021] sd
-
-[Andrea, Fri May 28 14:59:40 2021] dg
-
-[Andrea, Fri May 28 14:59:41 2021] g
-
-[Andrea, Fri May 28 14:59:41 2021] fdg
-
-[Adnr, Fri May 28 15:00:06 2021] [32m-- Join the chat
-[0m
-[Adnr, Fri May 28 15:00:07 2021] fgd
-
-[Adnr, Fri May 28 15:00:08 2021] fgdfgds
-
-[Adnr, Fri May 28 15:00:09 2021] g
-
-[Andrea, Fri May 28 15:00:12 2021] gdfgds
-
-[Andrea, Fri May 28 15:00:12 2021] fgsd
-
-[Andrea, Fri May 28 15:00:13 2021] [31m-- Left the chat
-[0m
-[Adnr, Fri May 28 15:00:15 2021] fgsdfgdf
-
-[Adnr, Fri May 28 15:00:16 2021] dsgdsf
-
-[asfs, Fri May 28 15:00:23 2021] [32m-- Join the chat
-[0m
-[asfs, Fri May 28 15:00:24 2021] dfasijasdg
-
-[asfs, Fri May 28 15:00:26 2021] gdfgdfgdsfgdjkhlnòfdashjkòadfshjkasdhjkasfdhjkfdashjksfdjkfasjhksdf
-
-[Adnr, Fri May 28 15:00:29 2021] versfadhuijkhjunaesrdfvch<junraefdshjunikrfaesdhjun
-
-[Adnr, Fri May 28 15:00:30 2021] [31m-- Left the chat
-[0m
-[asfs, Fri May 28 15:00:32 2021] [31m-- Left the chat
+[, Sun May 30 09:48:17 2021] [31m-- Left the chat
 [0m

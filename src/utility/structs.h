@@ -23,7 +23,6 @@ struttura usata per un accesso ai messaggi che sfrutta lock e conditions in modo
 typedef struct {
     pthread_mutex_t *mutex;         // puntatore almutex usato quando si vuole aggiungere un messaggio alla lista dei messaggi
     pthread_cond_t *cond;           // puntatore alla condition usata dal reader thread del server per capire quando ci sono messaggi in coda (producer - consumer)
-    long msg_n;                     // numero di messaggi in coda. viene usata questa variabile per la condition
 }chat_mutex;
 
 /*

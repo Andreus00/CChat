@@ -34,12 +34,6 @@ int send_message() {
         gtk_text_buffer_get_iter_at_offset (wid->textBuffer, &start_iter, 0);
 
         gtk_text_buffer_delete (wid->textBuffer, &start_iter, &end_iter);
-
-        char buff[14];
-
-        read(sockfd, buff, 14);
-
-        printf("%s\n", buff);
     }
 
     return 0;

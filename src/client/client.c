@@ -1,3 +1,21 @@
+/**
+Andrea Sanchietti.
+
+Client per CChat.
+
+Il client per cchat utilizza due thread: il primo, quello principale, si occupa
+di stabilire la connessione con il server e di mandare al server i messaggi del client;
+il secondo (detto reader), si occupa di legger i messaggi mandati dal server e di mostrarli
+sul terminale. Questo second thread parte solo una volta che il thread principale ha stabilito la connessione
+con il server e ha ricevuto dal server le informazioni riguardanti la mode.
+
+Il client non accetta parametri dato che non servono e legge tutti gli input che sevono per stabilire la connessione
+dallo stdin.
+
+*/
+
+
+
 #include <stdio.h>
 #include <unistd.h>
 #include <time.h>
