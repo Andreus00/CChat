@@ -46,3 +46,7 @@ il client non richiede argomenti. Per far partire il client basta
 
 Nella src c'è anche una cartella client_2. Essa contiene il progetto iniziale della gui per il client ormai abbandonato a causa di crash che avvolte avvengono
 durante l'inizializzazione della gui e senza un apparente motivo.
+```html
+$ gcc -pthread `pkg-config --cflags gtk+-3.0` client.c -o client `pkg-config --libs gtk+-3.0`
+```
+per compilarlo, ma è funzionante solamente la parte della gui e non si connette effettivamente al server a causa di alcune feature mancanti (quali la scelta del nickname, l'invio formattato dei messaggi e la lettura di essi)
