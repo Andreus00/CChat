@@ -2,10 +2,24 @@
 
 Una implementazione di una chatroom in C.
 
-per compilare il codice usare:
+per compilare il server e il client da terminale:
 ```html
 make all
 ```
+se si vuole compilare anche il client con la gui <strong>(in questo caso verrà chiesto di scaricare il package gtk)</strong> :
+```html
+make all-gui
+```
+
+Per rimuovere i compilati
+```html
+make clear
+```
+mentre per rimuovere la libreria scaricata
+```html
+make clear-dep
+```
+
 
 Il compilato verrà messo nella cartella bin (anche essa creata dal makefile).
 I file di log verranno messi nella stessa cartella del programma client o server.
@@ -42,11 +56,9 @@ il client non richiede argomenti. Per far partire il client basta
 ```html
 ./client
 ```
-
-
-Nella src c'è anche una cartella client_2. Essa contiene il progetto iniziale della gui per il client ormai abbandonato a causa di crash che avvolte avvengono
-durante l'inizializzazione della gui e senza un apparente motivo.
+o
 ```html
-$ gcc -pthread `pkg-config --cflags gtk+-3.0` client.c -o client `pkg-config --libs gtk+-3.0`
+./gui_client
 ```
-per compilarlo, ma è funzionante solamente la parte della gui e non si connette effettivamente al server a causa di alcune feature mancanti (quali la scelta del nickname, l'invio formattato dei messaggi e la lettura di essi)
+nel caso del client con l'interfaccia grafica.
+
