@@ -52,6 +52,9 @@ In TIMESTAMP_MODE questo argomento influenza anche quanto un messaggio deve aspe
 
 <h2>Client</h2>
 
+Il source code del client da terminale si trova nella cartella src/client mentre quello del client con la gui
+si trova in src/client_2/client
+
 il client non richiede argomenti. Per far partire il client basta
 ```html
 ./client
