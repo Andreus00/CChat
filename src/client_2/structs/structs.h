@@ -1,6 +1,6 @@
 #include <gtk/gtk.h>
 /*
-    this struct is used to contain all the widgets of the chatroom view
+Struttura che contiene i puntatori ai widget della chat_view
 */
 typedef struct {
     GtkWidget *main_frame;
@@ -15,7 +15,7 @@ typedef struct {
 }chatroom_widgets;
 
 /*
-    this struct is used to contain all the widgets of the login view
+Struttura che contiene i puntatori ai widget della login_view
 */
 typedef struct {
     GtkWidget *main_frame;
@@ -26,10 +26,13 @@ typedef struct {
     GtkWidget *port_field;
 } login_widgets;
 
+/*
+enum della mode
+*/
 enum chat_mode {TIMESTAMP_MODE, RECEIVE_MODE};
 
 /*
-    once the user enters the login data, this struct will contain all the pointers pointing to the information.
+struttura usata per contenere le informazioni sul login
 */
 typedef struct {
     char *nickname;
