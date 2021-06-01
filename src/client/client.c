@@ -209,7 +209,7 @@ int start_chat(login_data *log_data) {
                 // inizializzo il buffer dove metterò insieme il nickname, il time e il messaggio
                 char assembled_message[msg_len];
                 // asemblo il messaggio
-                snprintf(assembled_message, msg_len, "[%s, %s] %s\n", new_message->sender, new_message->time, new_message->message);
+                snprintf(assembled_message, msg_len, "[%s, %s] %s", new_message->sender, new_message->time, new_message->message);
                 // mando il mesaggio
                 write(log_data->fd, assembled_message, msg_len);
             }

@@ -99,17 +99,14 @@ int main(int argc, char *argv[]) {
     if (argc == 1) {
         port_in = 5000;
         mode = RECEIVE_MODE;
-        printf("port in = 5000\n");
     }
     else if(argc == 2) {
         port_in = atoi(argv[1]);
-        printf("Port in: %d\n", port_in);
         mode = RECEIVE_MODE;
         puts("Log mode not detected: setting RECEIVE_MODE");
     }
     else if (argc == 3 || argc == 4) {
         port_in = atoi(argv[1]);
-        printf("Port in: %d\n", port_in);
         if(strcmp(argv[2], "TIMESTAMP_MODE") == 0) {
             puts("Log mode : TIMESTAMP_MODE");
             mode = TIMESTAMP_MODE;
@@ -131,6 +128,7 @@ int main(int argc, char *argv[]) {
         print_usage();
     }
     if (port_in == 0 || millis_check == 0) print_usage();
+    printf("Port in: %d\n", port_in);
 
     // lunghezza della queue della listen
     unsigned int queue_length = 15;
@@ -339,7 +337,7 @@ e il text dato che il client invia tutto nella stessa stringa.
 void queue_message(chat_message_list *msg_list,char *nickname, char *text) {
     // lock sul mutex dell amessage list per evitare concottenza
     pthread_mutex_lock(msg_list->mutex->mutex);
-    puts("queuing messag");
+    puts("queuing message");
     // allocazione dello spazio in memoria per il nuovo messaggio e set del puntatore al nickname
     chat_message *new_message = malloc(sizeof(chat_message));
     new_message->sender = nickname;
@@ -408,7 +406,7 @@ void queue_message(chat_message_list *msg_list,char *nickname, char *text) {
     }
     // uso la signal per dire al reader thread che c'è un messaggio da inviare
     pthread_cond_signal(msg_list->mutex->cond);
-    puts("queued message");
+    puts("message queued");
     // unlock del mutex
     pthread_mutex_unlock(msg_list->mutex->mutex);
 }
@@ -423,12 +421,13 @@ void send_message_to_everyone(chat_message  *msg, dinamic_list *cli_data_list) {
     if (mode == TIMESTAMP_MODE) {
         // in questo passaggio il timestamp passa dall'essere in heap all'essere in stack.
         // faccio quindi la free del vecchio timestamp che si trova in heap.
-        char *old = msg->time;
+        char *old = msg->time;        
         msg->time = get_ascii_time_from_long((atol(msg->time)) / 1000000);
         free(old);
     }
     // invio del messaggio ai client
-    for (int i = 0; i <= cli_data_list->last; i++) {        
+    for (int i = 0; i <= cli_data_list->last; i++) {
+        printf("[%s, %s] \033[32m|\033[0m %s\n", msg->sender, msg->time, msg->message); // print superfluo usato per controllare il contenuto effettivo del messaggio
         dprintf(((cli_data *)(cli_data_list->list[i]))->clifd, "[%s, %s] \033[32m|\033[0m %s\n", msg->sender, msg->time, msg->message);
     }
     // unlock del mutex e log del messaggio
@@ -656,7 +655,7 @@ void * receiver_start(void *info) {
         if(!rec_info->running) {
             puts("Going to sleep");
             pthread_cond_wait(rec_info->cond, rec_info->mutex);
-            puts("unlocked");
+            puts("Wake up");
         }
         // a questo punto le informazioni all'interno di rec_info->receiver_param riguardano un client collegato in attesa di iniziare la chat.
         // lascio il lock e chiamo la funzione chat_start.
