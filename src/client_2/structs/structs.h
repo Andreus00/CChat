@@ -41,7 +41,9 @@ typedef struct {
     enum chat_mode mode;
 }login_data;
 
-
+/*
+Struttura usata per mantenere le informazioni sull'applicazione
+*/
 struct application_data{
   chatroom_widgets *widgets;
   login_widgets *lgn_widgets;
