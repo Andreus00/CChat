@@ -1,33 +1,33 @@
-CC = gcc
-LIBS = -pthread
-CLIBIN = bin/client/
+CC := gcc
+LIBS := -pthread
+CLI := src/client/
+GUICLI := src/client_2/client/
+SERV := src/server/
 
 
-client : bin-client
-	$(CC) $(LIBS) src/client/client.c -o $(CLIBIN)client
+#client : src/client/client.c bin-client
+#	$(CC) $(LIBS) src/client/client.c -o $(CLIBIN)client
 
-gui_client : gui_dependencies bin-client
-	$(CC) $(LIBS) `pkg-config --cflags gtk+-3.0` src/client_2/client/client.c -o  $(CLIBIN)/gui_client `pkg-config --libs gtk+-3.0`
+# gui_client : src/client_2/client/gui_client gui_dependencies bin-client
+# 	$(CC) $(LIBS) `pkg-config --cflags gtk+-3.0` src/client_2/client/gui_client.c -o  $(CLIBIN)/gui_client `pkg-config --libs gtk+-3.0`
 
-server : bin-server
-	$(CC) $(LIBS) src/server/server.c -o bin/server/server
+# server : bin-server
+# 	$(CC) $(LIBS) src/server/server.c -o $(SERVBIN)server
 
-bin-client : bin
-	mkdir -p bin/client
-bin-server : bin
-	mkdir -p bin/server
 bin :
-	mkdir -p bin
+	mkdir -p bin/server
+	mkdir -p bin/client
 
-gui_dependencies :
-	sudo apt install libgtk-3-dev
 
-all : client server
+all : bin
+	cd $(SERV) && $(MAKE)
+	cd $(CLI) && $(MAKE)
 
-all-gui : all gui_client
+all-gui : all
+	cd $(GUICLI) && $(MAKE)
 
-clear : 
-	rm -rf bin
+.PHONY clean : 
+	rm -rfi bin
 
-clear-dep:
+.PHONY clean-dep:
 	sudo apt remove libgtk-3-dev

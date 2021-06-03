@@ -1,4 +1,6 @@
 #include <gtk/gtk.h>
+#include "../../utility/enums.h"
+
 /*
 Struttura che contiene i puntatori ai widget della chat_view
 */
@@ -25,11 +27,6 @@ typedef struct {
     GtkWidget *host_field;
     GtkWidget *port_field;
 } login_widgets;
-
-/*
-enum della mode
-*/
-enum chat_mode {TIMESTAMP_MODE, RECEIVE_MODE};
 
 /*
 struttura usata per contenere le informazioni sul login

@@ -40,6 +40,8 @@ struct application_data *app_data;
 // struttura usata per mantenere le informazioni sui parametri usati per il login
 login_data *data;
 
+int run_app = 1;
+
 // funzione chiamata una volta che il login è completo. Essa inizializza la gui della chatroom.
 void login_callback(int fd) {
   app_data->servfd = fd;
@@ -72,6 +74,7 @@ void activate (GtkApplication* app, gpointer user_data) {
 // chiude il file descriptor.
 void shutdown_app (GtkApplication* app, gpointer user_data) {
   close(app_data->servfd);
+  run_app = 0;
 
   // g_object_unref (app);
 }
@@ -218,7 +221,7 @@ void *reader(void *info) {
     gtk_text_buffer_get_iter_at_offset(textBuffer, &iter, 0);
     char *buf;
     // while infinito per la lettura
-    while (1) {
+    while (run_app) {
         // lettura dal fine descriptor del messaggio
         buf = read_fd(app_data->servfd);
         // check sul buffer

@@ -6,22 +6,26 @@ per compilare il server e il client da terminale:
 ```html
 make all
 ```
-se si vuole compilare anche il client con la gui <strong>(in questo caso verrà chiesto di scaricare il package gtk)</strong> :
+se si vuole compilare anche il client con la gui <strong>(in questo caso verrà chiesto di scaricare il package per compilare gtk)</strong> :
 ```html
 make all-gui
 ```
 
 Per rimuovere i compilati
 ```html
-make clear
+make clean
 ```
 mentre per rimuovere la libreria scaricata
 ```html
-make clear-dep
+make clean-dep
 ```
 
 
-Il compilato verrà messo nella cartella bin (anche essa creata dal makefile).
+ho deciso di fare makefile multipli perchè ho letto in giro che il make ricorsivo è il modo più utilizzato per
+quando si hanno sottocartelle con file da compilare all'interno
+
+
+Il compilato verrà messo nella cartella bin (anche essa creata dal makefile principale).
 I file di log verranno messi nella stessa cartella del programma client o server.
 
 <hr class="rounded">
@@ -65,3 +69,7 @@ o
 ```
 nel caso del client con l'interfaccia grafica.
 
+
+NOTE:
+ l'applicazione gui_client usa delle strutture sue differenti da quelle di server e client e non ho potuto quindi riutilizzare molto di ciò
+ che avevo scritto.

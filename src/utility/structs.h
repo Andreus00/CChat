@@ -1,3 +1,4 @@
+#include "enums.h"
 /*
 Struttura utilizzata per mantenere i dati per il log degli utenti
 */
@@ -72,8 +73,3 @@ typedef struct {
     dinamic_list *cli_data_list;    // puntatore alla lista dei clienti
     chat_message_list *msg_list;    // puntatore alla lista dei messaggi
 } reader_thread_param;
-
-/*
-enum che racchiude le due mode con cui può essere lancato il server.
-*/
-enum chat_mode {TIMESTAMP_MODE, RECEIVE_MODE};
