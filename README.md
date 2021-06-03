@@ -2,6 +2,9 @@
 
 Una implementazione di una chatroom in C.
 
+Github: https://github.com/Andreus00/CChat.git
+
+
 per compilare il server e il client da terminale:
 ```html
 make all

@@ -29,6 +29,7 @@ dallo stdin.
 #include <arpa/inet.h>
 #include <sys/ioctl.h>
 #include <pthread.h>
+#include <errno.h>
 
 #include "../utility/dinamic_list.h"
 #include "../utility/structs.h"
@@ -47,6 +48,7 @@ int start_chat(login_data *);
 
 /*
 funzione che stampa un messaggio passato come input nello stderr e chiama la exit();
+Quando viene chiamata questa funzione l'errore è fatale e il programa no npuò continuare
 */
 void error(char *msg)
 {
@@ -69,8 +71,7 @@ int main (int argc, char **argv) {
     il client non accetta argomenti.
     */
     if (argc != 1) {
-    perror("Please launch the application without arguments");
-    exit(1);
+    error("Please launch the application without arguments");
     }
 
     printf("\033[2J");
@@ -134,7 +135,7 @@ void *reader(void *log_data) {
             free(buf);
         }
         else {
-            perror("\033[31mServer closed the connection\033[0m");
+            printf("\033[31mServer closed the connection\033[0m\n");
             close(((login_data *)log_data)->fd);
             exit(1);
         }
@@ -154,14 +155,18 @@ int start_chat(login_data *log_data) {
     // variabile dove viene messa la mode
     enum chat_mode mode;
     // lettura della modalità (il server scrive 1 o 0 in base alla mode)
-    read(log_data->fd, m, 1);
+    if (read(log_data->fd, m, 1) <= 0) {
+        error("Error while reading the mode");
+    };
     // check e set della mode
     if (m[0] == '0')
         mode = TIMESTAMP_MODE;
     else 
         mode = RECEIVE_MODE;
     // Creazione del reader thread. Ad esso viene passato log_data
-    pthread_create(&tid, NULL, &reader, (void *)log_data);
+    if (pthread_create(&tid, NULL, &reader, (void *)log_data) != 0) {
+        error("An error occurred while creating the reader thread");
+    }
 
     // viene inizializzato il chat_message con all'interno il nickname e il messaggio
     chat_message *new_message = malloc(sizeof(chat_message));
@@ -197,7 +202,9 @@ int start_chat(login_data *log_data) {
             // Inoltre basta mandare al server il solo messaggio.
             if (mode == RECEIVE_MODE) {
                 new_message->time = get_current_time();
-                write(log_data->fd, buff, strlen(buff));
+                if (write(log_data->fd, buff, strlen(buff))  < 0) {
+                    error("An error occurred while thriting to the server");
+                }
             }
             // se invece la mode è TIMESTAMP_MODE, bisogna mandare al server il messaggio formattato 
             // con all'interno anche il nickname e il tempo in microsecondi (per essere più precisi con il reinvio dei messaggi).
@@ -211,7 +218,9 @@ int start_chat(login_data *log_data) {
                 // asemblo il messaggio
                 snprintf(assembled_message, msg_len, "[%s, %s] %s", new_message->sender, new_message->time, new_message->message);
                 // mando il mesaggio
-                write(log_data->fd, assembled_message, msg_len);
+                if (write(log_data->fd, assembled_message, msg_len)  < 0) {
+                    error("An error occurred while thriting to the server");
+                }
             }
             // faccio il log del messaggio
             chat_log(new_message, mode);
@@ -242,7 +251,7 @@ login_data *init_connection() {
     
     // check del file descriptor
     if(sockfd < 0) {
-        error("Error while openeng socket.\n");
+        error("Error while openeng the socket.\n");
     }
     // alloco spazio in heap per i dati da ritornare
     data = malloc(sizeof(login_data));
@@ -298,8 +307,10 @@ login_data *init_connection() {
                 printf("\033[K");
                 fflush(stdin);
                 // check sulla porta inserita
-                if(0 > data->port || data->port > 65536)
-                    perror("Invalid port.");
+                if(0 > data->port || data->port > 65536){
+                    errno = 22;
+                    perror("Invalid port");                    
+                }
                 else {
                     // conversione della porta
                     serv_addr->sin_port = htons(data->port);
@@ -349,14 +360,18 @@ login_data *init_connection() {
     printf("\033[K");
     fflush(stdout);
     // mando al server il nickname
-    write(sockfd, data->nickname, strlen(data->nickname));
+    if(write(sockfd, data->nickname, strlen(data->nickname)) < 0) {
+        error("Error while sending the nickname to the server");
+    }
 
     // buffer dove viene messa la risposta del server riguardante l'accettazione o meno del nickname
     char response[2];
     response[1] = '\0';
 
     // lettura della risposta
-    read(sockfd, response, 1);
+    if (read(sockfd, response, 1) <= 0) {
+        error("Error while reading the response of the server");
+    }
 
     // finchè il server non accetta il nickname, questo while continua all'infinito.
     while (response[0] == '0') {
@@ -373,9 +388,11 @@ login_data *init_connection() {
         fflush(stdout);
 
         // invio del nickname al server
-        write(sockfd, data->nickname, strlen(data->nickname));
+        if (write(sockfd, data->nickname, strlen(data->nickname)) < 0) {
+            error("Error while sending the nickname to the server");
+        }
 
-        // check sulla write
+        // check sulla read
         if(read(sockfd, response, 1) <= 0) {
             perror("Server disconnected");
             close(sockfd);

@@ -174,7 +174,12 @@ int init_connection(login_data *data) {
     }
     puts("Connected to the server\n");
     // comunicazione del nickname al server
-    write(sockfd, data->nickname, strlen(data->nickname));
+    if (write(sockfd, data->nickname, strlen(data->nickname)) < 0) {
+        perror("Error while sending the nickname to the server");
+        free(serv_addr);
+        close(app_data->servfd);
+        return -1;
+    }
 
     // lettura della risposta del server.
     // se il server non accetta il nickname la funzione ritorna -1
@@ -182,7 +187,12 @@ int init_connection(login_data *data) {
     response[0] = '\0';
     response[1] = '\0';
 
-    read(sockfd, response, 1);
+    if (read(sockfd, response, 1) <= 0) {
+        free(serv_addr);
+        close(app_data->servfd);
+        perror("The server closed the connection");
+        return -1;
+    }
 
     if (response[0] == 48) {
       puts("nickname already in use.");
@@ -191,7 +201,12 @@ int init_connection(login_data *data) {
       return -1;
     }
     // lettura della mode del server
-    read(sockfd, response, 1);
+    if (read(sockfd, response, 1) <= 0) {
+        free(serv_addr);
+        close(app_data->servfd);
+        perror("The server closed the connection");
+        return -1;
+    }
 
     if (response[0] == '0') {
         data->mode = TIMESTAMP_MODE;
@@ -464,7 +479,9 @@ int send_message() {
         // invio il messaggio al server seguendo la mode di esso
         if (data->mode == RECEIVE_MODE) {
             new_message->time = get_current_time();
-            write(app_data->servfd, filtered_message, last_char - first_char + 4);
+            if (write(app_data->servfd, filtered_message, last_char - first_char + 4) < 0) {
+                perror("error while sending the message");
+            }
         }
         else {
             new_message->time = get_current_time_u();
@@ -475,7 +492,9 @@ int send_message() {
             
             snprintf(assembled_message, msg_len, "[%s, %s] %s", new_message->sender, new_message->time, new_message->message);
             
-            write(app_data->servfd, assembled_message, msg_len);
+            if (write(app_data->servfd, assembled_message, msg_len) < 0) {
+                perror("Error while sending the message");
+            }
         }
         // log del messaggio e free del testo (la memoria occupata da filtered_message sarà liberata da chat_log)
         chat_log(new_message, data->mode);

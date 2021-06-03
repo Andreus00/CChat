@@ -20,14 +20,16 @@ bin :
 
 
 all : bin
-	cd $(SERV) && $(MAKE)
-	cd $(CLI) && $(MAKE)
+	$(MAKE) -C $(SERV)
+	$(MAKE) -C $(CLI)
 
 all-gui : all
-	cd $(GUICLI) && $(MAKE)
+	$(MAKE) -C $(GUICLI)
 
-.PHONY clean : 
+.PHONY : clean
+clean : 
 	rm -rfi bin
 
-.PHONY clean-dep:
+.PHONY : clean-dep
+clean-dep:
 	sudo apt remove libgtk-3-dev
