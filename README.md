@@ -72,14 +72,14 @@ o
 ```
 nel caso del client con l'interfaccia grafica.
 
+Entrambi i client chiederanno tre parametri per connettersi al server: l'ip del server, la porta su cui il server sta ascoltando e il nickname da utilizzare per chattare.
 
-NOTE:
- l'applicazione gui_client usa delle strutture sue differenti da quelle di server e client e non ho potuto quindi riutilizzare molto di ciò
- che avevo scritto.
+<hr class="rounded">
 
-
-Test effettuati:
+<h2>Test effettuati</h2>
 
 Ho cercato bug un po' ovunque durante la fase di testing e ho corretto quelli che ho trovato.
 Principalemtne quello che facevo era cercare di stressare l'applicazione e, una volta trovato un bug,
 cercare di capire con gdb la causa per fixare.
+I test principali hanno riguardato la lunghezza dell'input, i check degli input, l'handle della perdita di connessione sia da parte client che da parte server, il reinvio dei messaggi da parte del server in base alla mode e anche controlli sulla memoria utilizzata e sulle free delle strutture.
+
