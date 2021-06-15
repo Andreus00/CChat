@@ -1,6 +1,6 @@
 CC := gcc
-LIBS := -pthread
+LDLIBS := -pthread
 SERVBIN := ../../bin/server/
 
 server : server.c
-	$(CC) $(LIBS) $< -o $(SERVBIN)$@
+	$(CC) $(LDLIBS) $< -o $(SERVBIN)$@

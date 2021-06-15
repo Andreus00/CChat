@@ -1,5 +1,3 @@
-GCC := gcc
-LIBS := -pthread
 CLI := src/client/
 GUICLI := src/client_2/client/
 SERV := src/server/

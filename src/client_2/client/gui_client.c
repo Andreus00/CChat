@@ -264,8 +264,7 @@ void *reader(void *info) {
             sleep(5);
             destroy_chatroom(app_data->widgets);
             close(app_data->servfd);
-            init_login();
-            return 0;
+            exit(0);
         }
     }
 }

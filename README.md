@@ -76,3 +76,10 @@ nel caso del client con l'interfaccia grafica.
 NOTE:
  l'applicazione gui_client usa delle strutture sue differenti da quelle di server e client e non ho potuto quindi riutilizzare molto di ciò
  che avevo scritto.
+
+
+Test effettuati:
+
+Ho cercato bug un po' ovunque durante la fase di testing e ho corretto quelli che ho trovato.
+Principalemtne quello che facevo era cercare di stressare l'applicazione e, una volta trovato un bug,
+cercare di capire con gdb la causa per fixare.

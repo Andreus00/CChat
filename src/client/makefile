@@ -1,6 +1,6 @@
 CC := gcc
-LIBS := -pthread
+LDLIBS := -pthread
 CLIBIN := ../../bin/client/
 
 client : client.c
-	$(CC) $(LIBS) $< -o $(CLIBIN)$@
+	$(CC) $(LDLIBS) $< -o $(CLIBIN)$@

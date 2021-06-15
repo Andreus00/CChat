@@ -142,8 +142,8 @@ int receiver_info_init(receiver_info *t_info, dinamic_list *cli_data_list, chat_
 Funzione che libera la memoria usata da una struct di tipo receiver_info
 */
 void receiver_info_free(receiver_info *t_info) {
-    free(t_info->cond);
-    free(t_info->mutex);
+    pthread_cond_destroy(t_info->cond);
+    pthread_mutex_destroy(t_info->mutex);
     free(t_info->receiver_param->data);
     free(t_info->receiver_param);
     free(t_info);
@@ -240,18 +240,20 @@ int main(int argc, char *argv[]) {
     // messaggi della cli_message_list. Usa la cond della cli_data_list per capire quando 
     // qualcuno manda un messaggio.
     pthread_t tid;
+    pthread_attr_t attributes;
+    pthread_attr_init(&attributes);
+    pthread_attr_setdetachstate(&attributes, PTHREAD_CREATE_DETACHED);
+
     reader_thread_param *reader_param = malloc(sizeof(reader_thread_param));
     reader_param->msg_list = msg_list;
     reader_param->cli_data_list = cli_data_list;
 
-    if(pthread_create(&tid, 0, &reader_start, reader_param) != 0) {       // check sul reader thread
+    if(pthread_create(&tid, &attributes, &reader_start, reader_param) != 0) {       // check sul reader thread
         error("Error while starting the reader thread");
     }
 
     // una volta inizializzato il reader thread, devo mettermi ad inizializzare i receiver thread.
 
-    // puntatore alla struttura da inizializzare e da passare ai reader thread
-    receiver_thread_param *receiver_param;
     // parametro da passare alla accept
     socklen_t n = sizeof(struct sockaddr_in);
 
@@ -273,7 +275,7 @@ int main(int argc, char *argv[]) {
         int failed = receiver_info_init(t_info, cli_data_list, msg_list);
 
         // creo il thread e controllo gli errori
-        if (pthread_create(&t_info->tid, 0, &receiver_start, t_info)) {
+        if (pthread_create(&t_info->tid, &attributes, &receiver_start, t_info)) {
             failed = 1;
             perror("Error while initializing a thread of the thread pool");
         }
@@ -358,7 +360,7 @@ int main(int argc, char *argv[]) {
             t_info->receiver_param->data->clifd = clifd;
 
             // creazione e check del thread
-            if (pthread_create(&t_info->tid, 0, &receiver_start, t_info)) {
+            if (pthread_create(&t_info->tid, &attributes, &receiver_start, t_info)) {
                 receiver_info_free(t_info);
                 free(cli_addr);
                 close(clifd);
@@ -748,8 +750,8 @@ void * receiver_start(void *info) {
                                 // inserisca dei dati validi in rec_info->receiver_param
     
     // se invece il thread deve terminare va ad eliminare dall'heap tutte le strutture che non serviranno più e ritorna
-    free(rec_info->cond);
-    free(rec_info->mutex);
+    pthread_cond_destroy(rec_info->cond);
+    pthread_mutex_destroy(rec_info->mutex);
     free(rec_info->receiver_param->data);
     free(rec_info->receiver_param);
     free(rec_info);
